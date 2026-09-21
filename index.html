@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<title>Treino Buritama</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treino">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --preto:#0A0A0A; --carvao:#151515; --risco:#272522;
+  --ouro:#C9A227; --ouro-fraco:#7A6317;
+  --osso:#EDE9E0; --fumaca:#8F8A80;
+
+  /* Modalidades: a rampa de latão da marca. Ela reprova como paleta
+     categórica pura (transição e corrida ficam a ΔE 8,2 na visão normal),
+     então a cor NUNCA carrega identidade sozinha aqui: todo lugar que usa
+     essas cores escreve o nome da modalidade ao lado. Os gráficos de
+     evolução não codificam modalidade por cor nenhuma. */
+  --m-natacao:#D9C98C; --m-ciclismo:#C9A227;
+  --m-corrida:#A87516; --m-transicao:#8C5E12; --m-forca:#6E6A61;
+
+  --cortar:#B4432E; --segurar:#C9A227; --seguir:#5F8A5B;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--preto);color:var(--osso);
+  font-family:'Archivo','Arial Narrow',system-ui,sans-serif;
+  font-variation-settings:'wdth' 100,'wght' 400;
+  font-size:16px;line-height:1.5;
+  overscroll-behavior-y:contain;
+  padding-bottom:calc(64px + env(safe-area-inset-bottom));
+}
+main{max-width:33rem;margin:0 auto;padding:1rem 1rem 2rem}
+.cond{font-variation-settings:'wdth' 74,'wght' 700}
+
+/* ---------- topo ---------- */
+.topo{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.2rem 0 .8rem;border-bottom:2px solid var(--ouro)}
+.marca{font-variation-settings:'wdth' 68,'wght' 800;font-size:1rem;
+  letter-spacing:.14em;color:var(--ouro)}
+.ctx{color:var(--fumaca);font-size:.8rem;text-align:right;line-height:1.3}
+.ctx b{display:block;color:var(--osso);font-variation-settings:'wdth' 78,'wght' 600;
+  font-size:.95rem}
+
+/* ---------- abas ---------- */
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--carvao);
+  border-top:1px solid var(--risco);z-index:20;
+  padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;min-height:58px;background:none;border:0;border-radius:0;
+  color:var(--fumaca);font-family:inherit;font-size:.72rem;letter-spacing:.09em;
+  font-variation-settings:'wdth' 84,'wght' 600;text-transform:uppercase;
+  cursor:pointer;border-top:2px solid transparent}
+nav button[aria-selected="true"]{color:var(--ouro);border-top-color:var(--ouro)}
+nav button:focus-visible{outline:2px solid var(--ouro);outline-offset:-4px}
+
+section[hidden]{display:none}
+
+/* ---------- data e sessões ---------- */
+.data{margin:1.2rem 0 1.3rem}
+.data .sem{font-variation-settings:'wdth' 74,'wght' 600;font-size:1.05rem;color:var(--fumaca);line-height:1}
+.data .num{font-variation-settings:'wdth' 70,'wght' 800;font-size:3rem;line-height:.95;margin-top:.1rem}
+.sessao{border-left:5px solid var(--cor,var(--ouro));padding-left:.85rem;margin-bottom:1.5rem}
+.sessao-topo{display:flex;align-items:baseline;justify-content:space-between;gap:.7rem}
+.sessao-mod{font-variation-settings:'wdth' 72,'wght' 700;font-size:1.2rem;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--cor,var(--ouro))}
+.sessao-min{font-variation-settings:'wdth' 70,'wght' 700;font-size:1.4rem;white-space:nowrap}
+.sessao-min span{font-size:.75rem;font-variation-settings:'wdth' 90,'wght' 500;color:var(--fumaca);margin-left:.2rem}
+.sessao-tit{font-variation-settings:'wght' 600;margin-top:.1rem}
+.sessao-zona{color:var(--fumaca);font-size:.88rem;margin-top:.1rem}
+.passos{margin-top:.65rem;padding:.7rem .8rem;background:var(--carvao);
+  border-left:1px solid var(--risco);white-space:pre-wrap;font-size:.92rem;line-height:1.55}
+.obs{color:var(--fumaca);font-size:.86rem;margin-top:.55rem}
+.feito{margin-top:.55rem;font-size:.86rem;color:var(--seguir);
+  font-variation-settings:'wght' 600}
+.folga{border-left:5px solid var(--risco);padding-left:.85rem;color:var(--fumaca);margin-bottom:1.5rem}
+.folga b{display:block;color:var(--osso);font-variation-settings:'wdth' 72,'wght' 700;
+  font-size:1.2rem;text-transform:uppercase;letter-spacing:.05em}
+
+/* ---------- blocos genéricos ---------- */
+h2.secao{font-variation-settings:'wdth' 72,'wght' 700;font-size:.95rem;
+  text-transform:uppercase;letter-spacing:.07em;color:var(--osso);
+  margin:1.8rem 0 .2rem;padding-top:.9rem;border-top:1px solid var(--risco)}
+h2.secao:first-child{border-top:0;padding-top:0;margin-top:.6rem}
+p.legenda{color:var(--fumaca);font-size:.85rem;margin-bottom:.8rem}
+.cartao{border:1px solid var(--risco);border-left:5px solid var(--linha,var(--risco));
+  background:var(--carvao);padding:.9rem;margin-bottom:1rem}
+.cartao h3{font-variation-settings:'wdth' 72,'wght' 700;font-size:1rem;
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+.cartao p{color:var(--fumaca);font-size:.9rem;margin-bottom:.45rem}
+.cartao p:last-child{margin-bottom:0}
+.decisao{font-variation-settings:'wdth' 84,'wght' 700;color:var(--osso);
+  margin:0 0 .6rem;padding-bottom:.55rem;border-bottom:1px solid var(--risco)}
+.metricas{display:flex;flex-wrap:wrap;gap:1.3rem;margin-top:.8rem;padding-top:.7rem;
+  border-top:1px solid var(--risco)}
+.metricas div{font-size:.68rem;color:var(--fumaca);letter-spacing:.05em}
+.metricas b{display:block;color:var(--osso);font-variation-settings:'wdth' 72,'wght' 700;
+  font-size:1.35rem;line-height:1.1}
+
+/* ---------- tabelas ---------- */
+table{width:100%;border-collapse:collapse;font-size:.83rem;margin-bottom:.4rem}
+th{text-align:left;color:var(--fumaca);font-variation-settings:'wdth' 84,'wght' 600;
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;
+  padding:.4rem .35rem;border-bottom:1px solid var(--risco)}
+td{padding:.45rem .35rem;border-bottom:1px solid var(--risco);vertical-align:top}
+td.z{font-variation-settings:'wdth' 72,'wght' 700;color:var(--ouro);width:2.2rem}
+td.como{color:var(--fumaca)}
+
+/* ---------- gráficos ---------- */
+figure{margin:0 0 1.4rem}
+figcaption{color:var(--fumaca);font-size:.78rem;margin-top:.3rem;line-height:1.4}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.gx{fill:var(--fumaca);font-size:9px;font-variation-settings:'wdth' 88,'wght' 500}
+.gv{fill:var(--osso);font-size:10px;font-variation-settings:'wdth' 78,'wght' 700}
+.grade{stroke:var(--risco);stroke-width:1}
+.dica{font-size:.8rem;color:var(--osso);background:var(--carvao);
+  border:1px solid var(--risco);padding:.45rem .6rem;margin-top:.4rem;min-height:2.1rem}
+
+/* ---------- controles ---------- */
+button.acao{display:block;width:100%;min-height:52px;padding:.8rem 1rem;
+  background:transparent;color:var(--osso);border:1px solid var(--risco);border-radius:0;
+  font-family:inherit;font-size:.92rem;font-variation-settings:'wdth' 88,'wght' 600;
+  letter-spacing:.03em;text-align:left;cursor:pointer;margin-bottom:.5rem}
+button.acao:hover{border-color:var(--ouro-fraco);background:var(--carvao)}
+button.acao:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+button.acao.principal{background:var(--ouro);color:var(--preto);border-color:var(--ouro);
+  font-variation-settings:'wdth' 88,'wght' 700;text-align:center}
+button.acao[disabled]{opacity:.45;cursor:default}
+input{width:100%;min-height:52px;padding:.8rem;background:var(--carvao);
+  color:var(--osso);border:1px solid var(--risco);border-radius:0;
+  font-family:inherit;font-size:1rem;margin-bottom:.6rem}
+input:focus{outline:2px solid var(--ouro);outline-offset:-2px}
+label{display:block;font-size:.8rem;color:var(--fumaca);margin-bottom:.3rem}
+#aviso{display:none;padding:.8rem;margin-bottom:1rem;background:var(--carvao);
+  border-left:5px solid var(--ouro);font-size:.9rem}
+#aviso.on{display:block}
+#aviso.erro{border-left-color:var(--cortar)}
+.carregando{color:var(--fumaca)}
+footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
+  color:var(--fumaca);font-size:.76rem;line-height:1.6}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<main>
+  <div class="topo">
+    <div class="marca">REVEST</div>
+    <div class="ctx"><b id="ctxSemana">—</b><span id="ctxProva"></span></div>
+  </div>
+
+  <div id="aviso"></div>
+
+  <!-- ============================ HOJE ============================ -->
+  <section id="v-hoje">
+    <div class="data">
+      <div class="sem" id="diaSemana">carregando</div>
+      <div class="num" id="diaNumero">—</div>
+    </div>
+    <div id="sessoesHoje" class="carregando">Abrindo o plano…</div>
+  </section>
+
+  <!-- ============================ SEMANA ============================ -->
+  <section id="v-semana" hidden>
+    <h2 class="secao">A semana</h2>
+    <p class="legenda" id="semanaResumo">—</p>
+    <div id="semanaDias"></div>
+    <h2 class="secao">Veredito da semana passada</h2>
+    <div id="veredito"></div>
+  </section>
+
+  <!-- ============================ EVOLUÇÃO ============================ -->
+  <section id="v-evolucao" hidden>
+    <h2 class="secao">Evolução</h2>
+    <p class="legenda" id="evolucaoResumo">—</p>
+    <div id="graficos"></div>
+  </section>
+
+  <!-- ============================ AJUSTES ============================ -->
+  <section id="v-ajustes" hidden>
+    <h2 class="secao">Zonas</h2>
+    <p class="legenda" id="zonasNota"></p>
+    <div id="zonas"></div>
+
+    <h2 class="secao">Conexão</h2>
+    <p class="legenda">A chave fica guardada só neste aparelho. Ela não vai
+      para o GitHub nem para lugar nenhum — o app fala direto com o
+      Intervals.icu.</p>
+    <label for="chave">Chave da API (Settings &gt; Developer Settings)</label>
+    <input id="chave" type="password" autocomplete="off" spellcheck="false"
+           placeholder="cole a chave aqui">
+    <label for="atleta">Número de atleta (ou 0)</label>
+    <input id="atleta" type="text" autocomplete="off" spellcheck="false" placeholder="0">
+    <button class="acao principal" id="bSalvar">Salvar e buscar meus treinos</button>
+    <button class="acao" id="bAtualizar">Atualizar agora</button>
+    <button class="acao" id="bEsquecer">Esquecer a chave neste aparelho</button>
+
+    <footer id="rodape"></footer>
+  </section>
+</main>
+
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-v="hoje">Hoje</button>
+  <button role="tab" aria-selected="false" data-v="semana">Semana</button>
+  <button role="tab" aria-selected="false" data-v="evolucao">Evolução</button>
+  <button role="tab" aria-selected="false" data-v="ajustes">Ajustes</button>
+</nav>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const CORES = {"Natação":"var(--m-natacao)","Ciclismo":"var(--m-ciclismo)",
+  "Corrida":"var(--m-corrida)","Transição":"var(--m-transicao)","Força":"var(--m-forca)"};
+const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const DIAS = ["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira",
+  "sexta-feira","sábado"];
+
+const G = { dados:null, ativ:[], wellness:[], buscadoEm:null };
+
+/* ---------------------------------------------------------------- utilidades */
+const hoje = () => { const d = new Date(); d.setHours(12,0,0,0); return d; };
+const iso = (d) => d.toISOString().slice(0,10);
+const dedata = (s) => { const [a,m,dd] = s.split("-").map(Number);
+  return new Date(a, m-1, dd, 12, 0, 0); };
+const el = (t, c, txt) => { const n = document.createElement(t);
+  if (c) n.className = c; if (txt != null) n.textContent = txt; return n; };
+const mmss = (min) => {
+  const m = Math.floor(min), s = Math.round((min - m) * 60);
+  return m + ":" + String(s).padStart(2, "0");
+};
+function aviso(txt, erro) {
+  const a = $("#aviso");
+  a.textContent = txt || "";
+  a.className = txt ? ("on" + (erro ? " erro" : "")) : "";
+}
+
+/* ---------------------------------------------------------------- credenciais */
+const cred = {
+  get chave(){ try { return localStorage.getItem("icu_chave") || ""; } catch(e){ return ""; } },
+  get atleta(){ try { return localStorage.getItem("icu_atleta") || "0"; } catch(e){ return "0"; } },
+  salvar(chave, atleta){
+    try { localStorage.setItem("icu_chave", chave);
+          localStorage.setItem("icu_atleta", atleta || "0"); } catch(e){}
+  },
+  limpar(){ try { localStorage.removeItem("icu_chave");
+                  localStorage.removeItem("icu_atleta"); } catch(e){} },
+};
+
+/* Cache do que veio da API, para o app abrir cheio mesmo sem sinal. */
+const cache = {
+  ler(){ try { return JSON.parse(localStorage.getItem("icu_cache") || "null"); }
+         catch(e){ return null; } },
+  gravar(o){ try { localStorage.setItem("icu_cache", JSON.stringify(o)); } catch(e){} },
+};
+
+async function api(caminho, params) {
+  if (!cred.chave) throw new Error("SEM_CHAVE");
+  const url = new URL("https://intervals.icu/api/v1" + caminho);
+  Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+  const r = await fetch(url, {
+    headers: { Authorization: "Basic " + btoa("API_KEY:" + cred.chave) },
+  });
+  if (r.status === 401 || r.status === 403) {
+    throw new Error("A chave foi recusada. Gere outra em Settings > Developer " +
+      "Settings no Intervals.icu e cole de novo em Ajustes.");
+  }
+  if (!r.ok) throw new Error("O Intervals.icu respondeu " + r.status + ".");
+  return r.json();
+}
+
+/* ---------------------------------------------------------------- dados */
+async function carregarPlano() {
+  const r = await fetch("dados.json", { cache: "no-cache" });
+  if (!r.ok) throw new Error("Não consegui abrir o plano.");
+  G.dados = await r.json();
+}
+
+async function buscarTreinos(forcar) {
+  const guardado = cache.ler();
+  const fresco = guardado && (Date.now() - guardado.em) < 20 * 60 * 1000;
+  if (guardado) { G.ativ = guardado.ativ; G.wellness = guardado.wellness;
+                  G.buscadoEm = guardado.em; }
+  if (!cred.chave || (fresco && !forcar)) return false;
+
+  const ini = G.dados.inicio;
+  const fim = iso(new Date(hoje().getTime() + 2 * 864e5));
+  const [ativ, wellness] = await Promise.all([
+    api("/athlete/" + cred.atleta + "/activities", { oldest: ini, newest: fim }),
+    api("/athlete/" + cred.atleta + "/wellness", { oldest: ini, newest: fim }),
+  ]);
+  G.ativ = Array.isArray(ativ) ? ativ : [];
+  G.wellness = Array.isArray(wellness) ? wellness : [];
+  G.buscadoEm = Date.now();
+  cache.gravar({ em: G.buscadoEm, ativ: G.ativ, wellness: G.wellness });
+  return true;
+}
+
+/* Minutos que contam como carga. Academia fica de fora dos dois lados da
+   conta, porque o relógio não grava musculação — a mesma regra do motor. */
+const contaCarga = (a) =>
+  !(G.dados.limiares.tipos_nao_contados || []).includes(String(a.type || ""));
+const minutosDe = (a) => (a.moving_time || a.elapsed_time || 0) / 60;
+const dataDe = (a) => String(a.start_date_local || a.start_date || "").slice(0, 10);
+
+function realizadoPorSemana() {
+  const por = {};
+  G.dados.semanas.forEach((s) => { por[s.numero] = 0; });
+  G.ativ.filter(contaCarga).forEach((a) => {
+    const d = dataDe(a);
+    const s = G.dados.semanas.find((w) => d >= w.inicio && d <= w.fim);
+    if (s) por[s.numero] += minutosDe(a);
+  });
+  return por;
+}
+
+const atividadesDoDia = (d) => G.ativ.filter((a) => dataDe(a) === d);
+
+function semanaDe(d) {
+  return G.dados.semanas.find((w) => d >= w.inicio && d <= w.fim) || null;
+}
+
+/* ---------------------------------------------------------------- HOJE */
+function pintaSessao(s, feitas) {
+  const b = el("div", "sessao");
+  b.style.setProperty("--cor", CORES[s.modalidade] || "var(--ouro)");
+  const topo = el("div", "sessao-topo");
+  topo.appendChild(el("span", "sessao-mod", s.modalidade));
+  const min = el("span", "sessao-min", String(s.minutos));
+  min.appendChild(el("span", null, s.metros ? "min · " + s.metros + "m" : "min"));
+  topo.appendChild(min);
+  b.appendChild(topo);
+  b.appendChild(el("div", "sessao-tit", s.titulo));
+  if (s.zona) b.appendChild(el("div", "sessao-zona", s.zona));
+  if (s.passos.length) b.appendChild(el("div", "passos", s.passos.join("\n")));
+  if (s.descricao) b.appendChild(el("div", "obs", s.descricao));
+  if (s.observacoes) b.appendChild(el("div", "obs", s.observacoes));
+
+  /* Casa a sessão com o que o relógio gravou, pelo tipo da atividade. */
+  const casada = feitas.find((a) => String(a.type || "") === s.tipo ||
+    (s.modalidade === "Força" && String(a.type || "") === "WeightTraining"));
+  if (casada) {
+    b.appendChild(el("div", "feito", "✓ feito — " +
+      Math.round(minutosDe(casada)) + " min registrados no relógio"));
+  }
+  return b;
+}
+
+function verHoje() {
+  const d = hoje(), dISO = iso(d);
+  $("#diaSemana").textContent = DIAS[d.getDay()];
+  $("#diaNumero").textContent = d.getDate() + " " + MESES[d.getMonth()];
+
+  const w = semanaDe(dISO);
+  $("#ctxSemana").textContent = w
+    ? (w.numero === 0 ? "calibração" : "semana " + w.numero + "/" + G.dados.total_semanas)
+    : "fora do plano";
+  const faltam = Math.round((dedata(G.dados.prova.data) - d) / 864e5);
+  $("#ctxProva").textContent = faltam >= 0 ? faltam + " dias para a prova" : "prova realizada";
+
+  const alvo = $("#sessoesHoje");
+  alvo.className = "";
+  alvo.textContent = "";
+  const sessoes = G.dados.sessoes.filter((s) => s.data === dISO);
+  const feitas = atividadesDoDia(dISO);
+  if (!sessoes.length) {
+    const f = el("div", "folga");
+    f.appendChild(el("b", null, "Descanso"));
+    f.appendChild(el("div", null,
+      "Nenhuma sessão programada hoje. O descanso está no plano de propósito."));
+    alvo.appendChild(f);
+    return;
+  }
+  sessoes.forEach((s) => alvo.appendChild(pintaSessao(s, feitas)));
+}
+
+/* ---------------------------------------------------------------- SEMANA */
+function verSemana() {
+  const d = hoje(), dISO = iso(d);
+  const w = semanaDe(dISO) || G.dados.semanas[0];
+  const real = realizadoPorSemana()[w.numero] || 0;
+  $("#semanaResumo").textContent =
+    "Semana " + w.numero + (w.taper ? " (taper)" : "") + " · previsto " +
+    w.minutos + " min, sendo " + w.minutos_comparaveis +
+    " min que o relógio grava · feito até agora " + Math.round(real) + " min.";
+
+  const alvo = $("#semanaDias");
+  alvo.textContent = "";
+  for (let i = 0; i < 7; i++) {
+    const dia = new Date(dedata(w.inicio).getTime() + i * 864e5);
+    const dISO2 = iso(dia);
+    const sess = G.dados.sessoes.filter((s) => s.data === dISO2);
+    const feitas = atividadesDoDia(dISO2);
+    const c = el("div", "cartao");
+    c.style.setProperty("--linha", dISO2 === dISO ? "var(--ouro)" : "var(--risco)");
+    c.appendChild(el("h3", null, DIAS[dia.getDay()] + " " + dia.getDate()));
+    if (!sess.length) { c.appendChild(el("p", null, "Descanso.")); }
+    sess.forEach((s) => {
+      const casada = feitas.find((a) => String(a.type || "") === s.tipo);
+      const linha = el("p", null, s.modalidade + " · " + s.titulo + " · " +
+        s.minutos + " min" + (casada ? "  ✓ " + Math.round(minutosDe(casada)) + " min" : ""));
+      if (casada) linha.style.color = "var(--seguir)";
+      c.appendChild(linha);
+    });
+    alvo.appendChild(c);
+  }
+  pintaVeredito();
+}
+
+/* O veredito usa os MESMOS limiares do motor em Python: eles vêm no
+   dados.json, não são copiados aqui. */
+function pintaVeredito() {
+  const alvo = $("#veredito");
+  alvo.textContent = "";
+  const dISO = iso(hoje());
+  const fechadas = G.dados.semanas.filter((w) => w.fim < dISO && w.numero > 0);
+  if (!fechadas.length) {
+    const c = el("div", "cartao");
+    c.appendChild(el("h3", null, "Sem veredito ainda"));
+    c.appendChild(el("p", null,
+      "Nenhuma semana terminou. O primeiro veredito aparece depois do primeiro domingo."));
+    alvo.appendChild(c);
+    return;
+  }
+  const w = fechadas[fechadas.length - 1];
+  const real = realizadoPorSemana()[w.numero] || 0;
+  const cump = w.minutos_comparaveis ? real / w.minutos_comparaveis : 0;
+  const L = G.dados.limiares;
+
+  let sev = "seguir", texto = "Dentro do esperado. O plano segue como está.";
+  if (cump < L.cumprimento_baixo) {
+    sev = "cortar";
+    texto = "Cumprimento de " + Math.round(cump * 100) + "%. Perder mais de 40% " +
+      "do volume invalida a progressão: o computador vai propor repetir a semana.";
+  } else if (cump > L.cumprimento_alto) {
+    sev = "segurar";
+    texto = "Cumprimento de " + Math.round(cump * 100) + "%. Você treinou além " +
+      "do plano. O excesso vira fadiga, não desempenho.";
+  } else if (cump < L.cumprimento_atencao) {
+    sev = "segurar";
+    texto = "Cumprimento de " + Math.round(cump * 100) + "%. Abaixo do previsto, " +
+      "mas ainda dentro do que o plano absorve.";
+  }
+
+  const c = el("div", "cartao");
+  c.style.setProperty("--linha", "var(--" + sev + ")");
+  c.appendChild(el("h3", null, "Semana " + w.numero + " encerrada"));
+  c.appendChild(el("div", "decisao", {cortar:"Atenção: volume muito abaixo",
+    segurar:"Segure o ritmo", seguir:"Pode seguir"}[sev]));
+  c.appendChild(el("p", null, texto));
+
+  const fc = fcDaSemana(w);
+  if (fc.recente != null && fc.base != null) {
+    const delta = fc.recente - fc.base;
+    c.appendChild(el("p", null, "FC de repouso: " + fc.recente.toFixed(0) +
+      " bpm contra uma base de " + fc.base.toFixed(0) + " (" +
+      (delta > 0 ? "+" : "") + delta.toFixed(0) + ")." +
+      (delta >= L.delta_fc_repouso
+        ? " Acima do limite de " + L.delta_fc_repouso + " bpm: sinal de fadiga."
+        : "")));
+  }
+  c.appendChild(el("p", null,
+    "Quem decide e grava o ajuste é o computador, com o INICIAR. Aqui você só vê."));
+
+  const m = el("div", "metricas");
+  const met = (r, v) => { const x = el("div"); x.appendChild(el("b", null, v));
+    x.appendChild(document.createTextNode(r)); m.appendChild(x); };
+  met("cumprimento", Math.round(cump * 100) + "%");
+  met("realizado", Math.round(real) + " min");
+  met("previsto s/ academia", w.minutos_comparaveis + " min");
+  c.appendChild(m);
+  alvo.appendChild(c);
+}
+
+function fcDaSemana(w) {
+  const val = (ini, fim) => {
+    const v = G.wellness
+      .filter((r) => { const d = String(r.id || "").slice(0, 10);
+        return d >= ini && d <= fim && typeof r.restingHR === "number" && r.restingHR > 0; })
+      .map((r) => r.restingHR);
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  };
+  const baseIni = iso(new Date(dedata(w.inicio).getTime() - 28 * 864e5));
+  const baseFim = iso(new Date(dedata(w.inicio).getTime() - 864e5));
+  return { recente: val(w.inicio, w.fim), base: val(baseIni, baseFim) };
+}
+
+/* ---------------------------------------------------------------- gráficos */
+const SVGNS = "http://www.w3.org/2000/svg";
+function svg(w, h) {
+  const s = document.createElementNS(SVGNS, "svg");
+  s.setAttribute("viewBox", "0 0 " + w + " " + h);
+  s.setAttribute("role", "img");
+  return s;
+}
+function no(tipo, attrs) {
+  const n = document.createElementNS(SVGNS, tipo);
+  Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+  return n;
+}
+function figura(titulo, elemento, nota, dica) {
+  const f = el("figure");
+  f.appendChild(el("h2", "secao", titulo));
+  if (dica) { const d = el("div", "dica", dica); f.appendChild(d); }
+  f.appendChild(elemento);
+  if (nota) f.appendChild(el("figcaption", null, nota));
+  return f;
+}
+
+/* Carga por semana: uma barra do que foi feito, e um traço do previsto.
+   Duas barras lado a lado por semana não cabem em 375px com 12 semanas. */
+function graficoCarga() {
+  const L = 340, A = 170, pe = 22, pd = 6, pt = 14, pb = 22;
+  const s = svg(L, A);
+  const semanas = G.dados.semanas.filter((w) => w.numero > 0);
+  const real = realizadoPorSemana();
+  const max = Math.max(...semanas.map((w) =>
+    Math.max(w.minutos_comparaveis, real[w.numero] || 0)), 60) * 1.12;
+  const larguraFaixa = (L - pe - pd) / semanas.length;
+  const larg = Math.max(6, larguraFaixa - 4);   /* 4px de respiro entre barras */
+  const y = (v) => pt + (A - pt - pb) * (1 - v / max);
+  const dISO = iso(hoje());
+
+  [0, 0.5, 1].forEach((f) => {
+    const yy = y(max * f);
+    s.appendChild(no("line", { x1: pe, x2: L - pd, y1: yy, y2: yy, class: "grade" }));
+    const t = no("text", { x: 2, y: yy + 3, class: "gx" });
+    t.textContent = Math.round(max * f);
+    s.appendChild(t);
+  });
+
+  semanas.forEach((w, i) => {
+    const x = pe + i * larguraFaixa + 2;
+    const feito = real[w.numero] || 0;
+    const atual = dISO >= w.inicio && dISO <= w.fim;
+    const futura = w.inicio > dISO;
+    if (feito > 0) {
+      s.appendChild(no("rect", { x: x, y: y(feito), width: larg,
+        height: Math.max(1, y(0) - y(feito)),
+        fill: atual ? "var(--ouro)" : "var(--ouro-fraco)" }));
+    }
+    /* previsto: traço, não barra — é referência, não medida concorrente */
+    const yp = y(w.minutos_comparaveis);
+    s.appendChild(no("line", { x1: x - 1, x2: x + larg + 1, y1: yp, y2: yp,
+      stroke: futura ? "var(--risco)" : "var(--osso)", "stroke-width": 2 }));
+    const t = no("text", { x: x + larg / 2, y: A - 8, "text-anchor": "middle", class: "gx" });
+    t.textContent = w.numero;
+    s.appendChild(t);
+    const alvoToque = no("rect", { x: x - 2, y: pt, width: larguraFaixa,
+      height: A - pt - pb + 10, fill: "transparent" });
+    alvoToque.addEventListener("click", () => {
+      s.parentNode.querySelector(".dica").textContent =
+        "Semana " + w.numero + ": previsto " + w.minutos_comparaveis +
+        " min, feito " + Math.round(feito) + " min" +
+        (w.minutos_comparaveis ? " (" + Math.round(feito / w.minutos_comparaveis * 100) + "%)" : "");
+    });
+    s.appendChild(alvoToque);
+  });
+  return s;
+}
+
+function graficoFC() {
+  const pontos = G.wellness
+    .filter((r) => typeof r.restingHR === "number" && r.restingHR > 0)
+    .map((r) => ({ d: String(r.id).slice(0, 10), v: r.restingHR }))
+    .sort((a, b) => a.d.localeCompare(b.d));
+  if (pontos.length < 3) return null;
+
+  const L = 340, A = 150, pe = 24, pd = 6, pt = 12, pb = 20;
+  const s = svg(L, A);
+  const vs = pontos.map((p) => p.v);
+  const min = Math.min(...vs) - 2, max = Math.max(...vs) + 2;
+  const x = (i) => pe + (L - pe - pd) * (pontos.length === 1 ? 0 : i / (pontos.length - 1));
+  const y = (v) => pt + (A - pt - pb) * (1 - (v - min) / (max - min || 1));
+
+  const base = vs.slice(0, Math.min(14, vs.length)).reduce((a, b) => a + b, 0) /
+    Math.min(14, vs.length);
+  const alerta = base + G.dados.limiares.delta_fc_repouso;
+  [min, max].forEach((v) => {
+    const t = no("text", { x: 2, y: y(v) + 3, class: "gx" });
+    t.textContent = Math.round(v);
+    s.appendChild(t);
+  });
+  s.appendChild(no("line", { x1: pe, x2: L - pd, y1: y(base), y2: y(base),
+    stroke: "var(--fumaca)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+  if (alerta <= max) {
+    s.appendChild(no("line", { x1: pe, x2: L - pd, y1: y(alerta), y2: y(alerta),
+      stroke: "var(--cortar)", "stroke-width": 1, "stroke-dasharray": "2 4" }));
+  }
+  const d = pontos.map((p, i) => (i ? "L" : "M") + x(i) + " " + y(p.v)).join(" ");
+  s.appendChild(no("path", { d: d, fill: "none", stroke: "var(--ouro)", "stroke-width": 2 }));
+  pontos.forEach((p, i) => {
+    const c = no("circle", { cx: x(i), cy: y(p.v), r: 2.5, fill: "var(--ouro)" });
+    s.appendChild(c);
+    const toque = no("circle", { cx: x(i), cy: y(p.v), r: 11, fill: "transparent" });
+    toque.addEventListener("click", () => {
+      s.parentNode.querySelector(".dica").textContent =
+        p.d.split("-").reverse().join("/") + ": " + p.v + " bpm (base " +
+        base.toFixed(0) + ")";
+    });
+    s.appendChild(toque);
+  });
+  return s;
+}
+
+/* Ritmo de natação: eixo INVERTIDO de propósito — mais rápido fica em cima,
+   que é como um atleta lê progresso. A legenda diz isso em palavras. */
+function graficoNado() {
+  const pontos = G.ativ
+    .filter((a) => String(a.type) === "Swim" && a.distance > 0 && minutosDe(a) > 0)
+    .map((a) => ({ d: dataDe(a), v: minutosDe(a) / (a.distance / 100) }))
+    .filter((p) => p.v > 1 && p.v < 6)
+    .sort((a, b) => a.d.localeCompare(b.d));
+  if (pontos.length < 2) return null;
+
+  const L = 340, A = 150, pe = 30, pd = 6, pt = 12, pb = 20;
+  const s = svg(L, A);
+  const vs = pontos.map((p) => p.v);
+  const css = 2.5;                                   /* CSS provisório 2:30/100m */
+  const min = Math.min(...vs, css) - 0.1, max = Math.max(...vs, css) + 0.1;
+  const x = (i) => pe + (L - pe - pd) * (pontos.length === 1 ? 0 : i / (pontos.length - 1));
+  const y = (v) => pt + (A - pt - pb) * ((v - min) / (max - min || 1));  /* invertido */
+
+  [min, max].forEach((v) => {
+    const t = no("text", { x: 2, y: y(v) + 3, class: "gx" });
+    t.textContent = mmss(v);
+    s.appendChild(t);
+  });
+  s.appendChild(no("line", { x1: pe, x2: L - pd, y1: y(css), y2: y(css),
+    stroke: "var(--fumaca)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+  const rotulo = no("text", { x: L - pd, y: y(css) - 4, "text-anchor": "end", class: "gx" });
+  rotulo.textContent = "CSS 2:30";
+  s.appendChild(rotulo);
+
+  const d = pontos.map((p, i) => (i ? "L" : "M") + x(i) + " " + y(p.v)).join(" ");
+  s.appendChild(no("path", { d: d, fill: "none", stroke: "var(--m-natacao)", "stroke-width": 2 }));
+  pontos.forEach((p, i) => {
+    s.appendChild(no("circle", { cx: x(i), cy: y(p.v), r: 3, fill: "var(--m-natacao)" }));
+    const toque = no("circle", { cx: x(i), cy: y(p.v), r: 11, fill: "transparent" });
+    toque.addEventListener("click", () => {
+      s.parentNode.querySelector(".dica").textContent =
+        p.d.split("-").reverse().join("/") + ": " + mmss(p.v) + "/100m";
+    });
+    s.appendChild(toque);
+  });
+  return s;
+}
+
+function verEvolucao() {
+  const alvo = $("#graficos");
+  alvo.textContent = "";
+  if (!cred.chave) {
+    $("#evolucaoResumo").textContent =
+      "Para ver a evolução eu preciso ler o que você treinou. Vá em Ajustes e cole a chave do Intervals.icu.";
+    return;
+  }
+  const real = realizadoPorSemana();
+  const dISO = iso(hoje());
+  const fechadas = G.dados.semanas.filter((w) => w.fim < dISO && w.numero > 0);
+  const somaP = fechadas.reduce((a, w) => a + w.minutos_comparaveis, 0);
+  const somaR = fechadas.reduce((a, w) => a + (real[w.numero] || 0), 0);
+  $("#evolucaoResumo").textContent = fechadas.length
+    ? fechadas.length + " semana(s) fechada(s): " + Math.round(somaR) + " de " +
+      Math.round(somaP) + " min previstos (" + Math.round(somaR / somaP * 100) + "%)."
+    : "Nenhuma semana fechou ainda. Os gráficos ficam mais úteis a cada domingo.";
+
+  alvo.appendChild(figura("Carga por semana", graficoCarga(),
+    "Barra é o que você treinou; o traço é o previsto sem a academia, que o " +
+    "relógio não grava. Barra clara é a semana de agora. Toque numa semana.",
+    "Toque numa semana para ver os números."));
+
+  const fc = graficoFC();
+  if (fc) {
+    alvo.appendChild(figura("FC de repouso", fc,
+      "A linha pontilhada cinza é a sua base. A vermelha é o limite de +" +
+      G.dados.limiares.delta_fc_repouso + " bpm, onde o sistema corta carga.",
+      "Toque num ponto para ver o dia."));
+  }
+  const nado = graficoNado();
+  if (nado) {
+    alvo.appendChild(figura("Ritmo de natação", nado,
+      "Eixo invertido: mais alto é mais rápido. A linha pontilhada é o seu CSS " +
+      "provisório de 2:30/100m — ele ainda não foi confirmado por teste.",
+      "Toque num ponto para ver o dia."));
+  }
+  if (!fc && !nado) {
+    alvo.appendChild(el("p", "legenda",
+      "Os gráficos de FC e de natação aparecem quando houver dados suficientes " +
+      "no Intervals.icu."));
+  }
+}
+
+/* ---------------------------------------------------------------- AJUSTES */
+function verAjustes() {
+  $("#zonasNota").textContent = G.dados.zonas_nota || "";
+  const alvo = $("#zonas");
+  alvo.textContent = "";
+  Object.entries(G.dados.zonas || {}).forEach(([mod, z]) => {
+    const c = el("div", "cartao");
+    c.style.setProperty("--linha", CORES[mod] || "var(--ouro)");
+    c.appendChild(el("h3", null, mod));
+    const t = el("table");
+    const thead = el("thead"), tr = el("tr");
+    ["", "Zona"].concat(z.unidades).forEach((h) => tr.appendChild(el("th", null, h)));
+    thead.appendChild(tr); t.appendChild(thead);
+    const tb = el("tbody");
+    z.linhas.forEach((l) => {
+      const r = el("tr");
+      r.appendChild(el("td", "z", l[0]));
+      r.appendChild(el("td", null, l[1]));
+      r.appendChild(el("td", null, l[2]));
+      r.appendChild(el("td", null, l[3]));
+      tb.appendChild(r);
+      const r2 = el("tr");
+      const td = el("td", "como", l[4]);
+      td.colSpan = 4;
+      r2.appendChild(td);
+      tb.appendChild(r2);
+    });
+    t.appendChild(tb);
+    c.appendChild(t);
+    alvo.appendChild(c);
+  });
+
+  $("#chave").value = cred.chave;
+  $("#atleta").value = cred.atleta;
+  $("#rodape").textContent = G.dados.prova.nome + " — " + G.dados.prova.local +
+    ". Plano gerado em " + G.dados.gerado_em.slice(0, 10).split("-").reverse().join("/") +
+    (G.buscadoEm ? ". Treinos atualizados em " +
+      new Date(G.buscadoEm).toLocaleString("pt-BR") : "") +
+    ". Nada aqui substitui treinador.";
+}
+
+/* ---------------------------------------------------------------- navegação */
+function mostrar(v) {
+  ["hoje", "semana", "evolucao", "ajustes"].forEach((n) => {
+    $("#v-" + n).hidden = n !== v;
+  });
+  $$("nav button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.v === v)));
+  if (v === "hoje") verHoje();
+  if (v === "semana") verSemana();
+  if (v === "evolucao") verEvolucao();
+  if (v === "ajustes") verAjustes();
+  window.scrollTo(0, 0);
+}
+
+$$("nav button").forEach((b) => b.addEventListener("click", () => mostrar(b.dataset.v)));
+
+$("#bSalvar").addEventListener("click", async () => {
+  const chave = $("#chave").value.trim();
+  if (!chave) { aviso("Cole a chave antes de salvar.", true); return; }
+  cred.salvar(chave, $("#atleta").value.trim() || "0");
+  await atualizar(true);
+});
+$("#bAtualizar").addEventListener("click", () => atualizar(true));
+$("#bEsquecer").addEventListener("click", () => {
+  cred.limpar();
+  try { localStorage.removeItem("icu_cache"); } catch (e) {}
+  G.ativ = []; G.wellness = []; G.buscadoEm = null;
+  $("#chave").value = ""; $("#atleta").value = "0";
+  aviso("Chave apagada deste aparelho.");
+  mostrar("ajustes");
+});
+
+async function atualizar(forcar) {
+  const b = $("#bAtualizar");
+  b.disabled = true;
+  try {
+    /* Só anuncia se realmente foi buscar. Dizer "atualizado" quando só leu o
+       cache faria ele confiar num número velho. */
+    aviso(await buscarTreinos(forcar) ? "Treinos atualizados agora." : "");
+  } catch (e) {
+    if (String(e.message) !== "SEM_CHAVE") {
+      aviso(e.message + " (o app continua funcionando com o que já tinha)", true);
+    }
+  }
+  b.disabled = false;
+  const atual = $$("nav button").find((x) => x.getAttribute("aria-selected") === "true");
+  mostrar(atual ? atual.dataset.v : "hoje");
+}
+
+/* ---------------------------------------------------------------- início */
+(async function () {
+  try {
+    await carregarPlano();
+  } catch (e) {
+    aviso("Não consegui abrir o plano. Tente de novo com internet.", true);
+    return;
+  }
+  mostrar("hoje");
+  if (!cred.chave) {
+    aviso("Primeira vez? Vá em Ajustes e cole a chave do Intervals.icu para " +
+      "ver o que você treinou. O plano do dia já funciona sem ela.");
+  }
+  await atualizar(false);
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
