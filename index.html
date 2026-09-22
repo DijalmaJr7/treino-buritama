@@ -59,10 +59,12 @@ main{max-width:33rem;margin:0 auto;padding:1rem 1rem 2rem}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--carvao);
   border-top:1px solid var(--risco);z-index:20;
   padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;min-height:58px;background:none;border:0;border-radius:0;
-  color:var(--fumaca);font-family:inherit;font-size:.72rem;letter-spacing:.09em;
-  font-variation-settings:'wdth' 84,'wght' 600;text-transform:uppercase;
-  cursor:pointer;border-top:2px solid transparent}
+/* Cinco abas em 375px: a fonte encolhe e o espaçamento aperta, mas o alvo de
+   toque continua com 58px de altura. */
+nav button{flex:1;min-height:58px;padding:0 .1rem;background:none;border:0;
+  border-radius:0;color:var(--fumaca);font-family:inherit;font-size:.66rem;
+  letter-spacing:.04em;font-variation-settings:'wdth' 78,'wght' 600;
+  text-transform:uppercase;cursor:pointer;border-top:2px solid transparent}
 nav button[aria-selected="true"]{color:var(--ouro);border-top-color:var(--ouro)}
 nav button:focus-visible{outline:2px solid var(--ouro);outline-offset:-4px}
 
@@ -101,6 +103,10 @@ p.legenda{color:var(--fumaca);font-size:.85rem;margin-bottom:.8rem}
   text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
 .cartao p{color:var(--fumaca);font-size:.9rem;margin-bottom:.45rem}
 .cartao p:last-child{margin-bottom:0}
+.cartao b{color:var(--osso)}
+code{font-family:ui-monospace,'Consolas',monospace;font-size:.86em;
+  background:var(--preto);border:1px solid var(--risco);padding:.05rem .25rem;
+  color:var(--ouro)}
 .decisao{font-variation-settings:'wdth' 84,'wght' 700;color:var(--osso);
   margin:0 0 .6rem;padding-bottom:.55rem;border-bottom:1px solid var(--risco)}
 .metricas{display:flex;flex-wrap:wrap;gap:1.3rem;margin-top:.8rem;padding-top:.7rem;
@@ -227,12 +233,29 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
     <div id="graficos"></div>
   </section>
 
-  <!-- ============================ AJUSTES ============================ -->
-  <section id="v-ajustes" hidden>
+  <!-- ============================ ZONAS ============================ -->
+  <section id="v-zonas" hidden>
     <h2 class="secao">Zonas</h2>
+    <div class="cartao" style="--linha:var(--ouro)">
+      <h3>Isto é uma cópia para consulta</h3>
+      <p><b>Mudar não dá, e não adiantaria:</b> esta tabela não manda em nada.
+        Os números de verdade ficam em dois lugares, e cada um muda uma coisa
+        diferente.</p>
+      <p><b>Alvos de FC</b> (<code>Z2 HR</code>): quem traduz a zona em
+        batimentos, na hora de mandar para o relógio, é o Intervals.icu em
+        <b>Settings → Zones</b>. É lá que se muda.</p>
+      <p><b>Alvos de ritmo</b> (<code>5:20/km</code>, <code>2:30/100m</code>):
+        vão <b>literais</b> do plano para o relógio. Mudar no Intervals.icu não
+        altera nada — tem que mudar no plano, no computador.</p>
+      <p>No computador, <code>python sync.py zonas</code> lê as zonas da sua
+        conta e avisa se elas divergem desta tabela.</p>
+    </div>
     <p class="legenda" id="zonasNota"></p>
     <div id="zonas"></div>
+  </section>
 
+  <!-- ============================ AJUSTES ============================ -->
+  <section id="v-ajustes" hidden>
     <h2 class="secao">Conexão</h2>
     <p class="legenda">A chave fica guardada só neste aparelho. Ela não vai
       para o GitHub nem para lugar nenhum — o app fala direto com o
@@ -254,6 +277,7 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
   <button role="tab" aria-selected="true" data-v="hoje">Hoje</button>
   <button role="tab" aria-selected="false" data-v="semana">Semana</button>
   <button role="tab" aria-selected="false" data-v="evolucao">Evolução</button>
+  <button role="tab" aria-selected="false" data-v="zonas">Zonas</button>
   <button role="tab" aria-selected="false" data-v="ajustes">Ajustes</button>
 </nav>
 
@@ -823,7 +847,8 @@ function verEvolucao() {
 }
 
 /* ---------------------------------------------------------------- AJUSTES */
-function verAjustes() {
+/* ---------------------------------------------------------------- ZONAS */
+function verZonas() {
   $("#zonasNota").textContent = G.dados.zonas_nota || "";
   const alvo = $("#zonas");
   alvo.textContent = "";
@@ -853,7 +878,10 @@ function verAjustes() {
     c.appendChild(t);
     alvo.appendChild(c);
   });
+}
 
+/* ---------------------------------------------------------------- AJUSTES */
+function verAjustes() {
   $("#chave").value = cred.chave;
   $("#atleta").value = cred.atleta;
   $("#rodape").textContent = G.dados.prova.nome + " — " + G.dados.prova.local +
@@ -930,15 +958,14 @@ function pintaInstalar() {
 }
 
 /* ---------------------------------------------------------------- navegação */
+const VISTAS = { hoje: verHoje, semana: verSemana, evolucao: verEvolucao,
+                 zonas: verZonas, ajustes: verAjustes };
+
 function mostrar(v) {
-  ["hoje", "semana", "evolucao", "ajustes"].forEach((n) => {
-    $("#v-" + n).hidden = n !== v;
-  });
-  $$("nav button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.v === v)));
-  if (v === "hoje") verHoje();
-  if (v === "semana") verSemana();
-  if (v === "evolucao") verEvolucao();
-  if (v === "ajustes") verAjustes();
+  Object.keys(VISTAS).forEach((n) => { $("#v-" + n).hidden = n !== v; });
+  $$("nav button").forEach(
+    (b) => b.setAttribute("aria-selected", String(b.dataset.v === v)));
+  (VISTAS[v] || verHoje)();
   window.scrollTo(0, 0);
 }
 
