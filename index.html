@@ -109,6 +109,44 @@ p.legenda{color:var(--fumaca);font-size:.85rem;margin-bottom:.8rem}
 .metricas b{display:block;color:var(--osso);font-variation-settings:'wdth' 72,'wght' 700;
   font-size:1.35rem;line-height:1.1}
 
+/* ---------- estado do treino (concluído / parcial / não feito) ---------- */
+/* Três estados, cada um com PALAVRA além da cor: quem lê no sol da manhã não
+   pode depender de distinguir verde de amarelo. */
+.chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;
+  letter-spacing:.06em;text-transform:uppercase;padding:.2rem .45rem;
+  font-variation-settings:'wdth' 84,'wght' 700;border:1px solid currentColor}
+.chip.feito{color:var(--seguir)}
+.chip.parcial{color:var(--segurar)}
+.chip.nao{color:var(--fumaca)}
+.chip i{width:8px;height:8px;background:currentColor;display:block}
+.realizado{color:var(--fumaca);font-size:.8rem;margin-top:.3rem}
+
+/* ---------- sessão expansível na semana ---------- */
+details.sess{border-top:1px solid var(--risco);padding:.6rem 0}
+details.sess:first-of-type{border-top:0}
+details.sess > summary{list-style:none;cursor:pointer;display:flex;
+  align-items:baseline;justify-content:space-between;gap:.6rem;min-height:44px}
+details.sess > summary::-webkit-details-marker{display:none}
+details.sess > summary:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+.sum-esq{display:flex;flex-direction:column;gap:.15rem}
+.sum-mod{font-variation-settings:'wdth' 74,'wght' 700;font-size:.9rem;
+  text-transform:uppercase;letter-spacing:.05em;color:var(--cor,var(--ouro))}
+.sum-tit{font-size:.88rem;color:var(--osso)}
+.sum-dir{text-align:right;white-space:nowrap}
+.sum-min{font-variation-settings:'wdth' 72,'wght' 700;font-size:1.05rem}
+details.sess[open] > summary{margin-bottom:.5rem}
+details.sess .passos{font-size:.86rem}
+
+/* ---------- instalar ---------- */
+#instalar{border:1px solid var(--ouro-fraco);background:var(--carvao);
+  padding:.85rem;margin-bottom:1rem;display:none}
+#instalar.on{display:block}
+#instalar h3{font-variation-settings:'wdth' 72,'wght' 700;font-size:.9rem;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--ouro);margin-bottom:.4rem}
+#instalar p{color:var(--fumaca);font-size:.86rem;margin-bottom:.6rem}
+#instalar ol{color:var(--fumaca);font-size:.86rem;margin:0 0 .6rem 1.1rem}
+#instalar li{margin-bottom:.25rem}
+
 /* ---------- tabelas ---------- */
 table{width:100%;border-collapse:collapse;font-size:.83rem;margin-bottom:.4rem}
 th{text-align:left;color:var(--fumaca);font-variation-settings:'wdth' 84,'wght' 600;
@@ -162,6 +200,7 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
   </div>
 
   <div id="aviso"></div>
+  <div id="instalar"></div>
 
   <!-- ============================ HOJE ============================ -->
   <section id="v-hoje">
@@ -328,12 +367,64 @@ function realizadoPorSemana() {
 
 const atividadesDoDia = (d) => G.ativ.filter((a) => dataDe(a) === d);
 
+/* Três estados, como na assessoria: concluído, parcial, não feito.
+   Antes bastava existir uma atividade do mesmo tipo no dia para marcar
+   "feito" — por isso um treino pela metade aparecia como completo.
+   Agora compara MINUTO A MINUTO contra o previsto. */
+const COMPLETO = 0.90;   /* daqui para cima, concluído */
+
+function realizadoPorSessao(dISO) {
+  const sessoes = G.dados.sessoes.filter((s) => s.data === dISO);
+  const feitas = atividadesDoDia(dISO);
+  const porTipo = {}, planPorTipo = {};
+  feitas.forEach((a) => {
+    const t = String(a.type || "");
+    porTipo[t] = (porTipo[t] || 0) + minutosDe(a);
+  });
+  sessoes.forEach((s) => {
+    planPorTipo[s.tipo] = (planPorTipo[s.tipo] || 0) + s.minutos;
+  });
+  /* Dois treinos do mesmo tipo no mesmo dia dividem o realizado na proporção
+     do que cada um pedia — senão um levaria o crédito do outro. */
+  const mapa = {};
+  sessoes.forEach((s, i) => {
+    const total = porTipo[s.tipo] || 0;
+    const plano = planPorTipo[s.tipo] || s.minutos || 1;
+    mapa[i] = total * ((s.minutos || 0) / plano);
+  });
+  return { sessoes: sessoes, feito: mapa };
+}
+
+function estadoDa(sessao, minutosFeitos) {
+  const prev = sessao.minutos || 0;
+  const pct = prev ? minutosFeitos / prev : 0;
+  if (minutosFeitos <= 0) {
+    return { chave: "nao", rotulo: "não feito", pct: 0, min: 0 };
+  }
+  return {
+    chave: pct >= COMPLETO ? "feito" : "parcial",
+    rotulo: pct >= COMPLETO ? "concluído" : "parcial",
+    pct: pct,
+    min: minutosFeitos,
+  };
+}
+
+function chipDe(est, previsto) {
+  const c = el("span", "chip " + est.chave);
+  c.appendChild(el("i"));
+  c.appendChild(document.createTextNode(
+    est.chave === "nao" ? est.rotulo
+      : est.rotulo + " · " + Math.round(est.pct * 100) + "%"));
+  c.title = Math.round(est.min) + " de " + previsto + " min";
+  return c;
+}
+
 function semanaDe(d) {
   return G.dados.semanas.find((w) => d >= w.inicio && d <= w.fim) || null;
 }
 
 /* ---------------------------------------------------------------- HOJE */
-function pintaSessao(s, feitas) {
+function pintaSessao(s, est) {
   const b = el("div", "sessao");
   b.style.setProperty("--cor", CORES[s.modalidade] || "var(--ouro)");
   const topo = el("div", "sessao-topo");
@@ -348,12 +439,14 @@ function pintaSessao(s, feitas) {
   if (s.descricao) b.appendChild(el("div", "obs", s.descricao));
   if (s.observacoes) b.appendChild(el("div", "obs", s.observacoes));
 
-  /* Casa a sessão com o que o relógio gravou, pelo tipo da atividade. */
-  const casada = feitas.find((a) => String(a.type || "") === s.tipo ||
-    (s.modalidade === "Força" && String(a.type || "") === "WeightTraining"));
-  if (casada) {
-    b.appendChild(el("div", "feito", "✓ feito — " +
-      Math.round(minutosDe(casada)) + " min registrados no relógio"));
+  if (est) {
+    const linha = el("div", "realizado");
+    linha.appendChild(chipDe(est, s.minutos));
+    if (est.chave !== "nao") {
+      linha.appendChild(document.createTextNode(
+        "  " + Math.round(est.min) + " de " + s.minutos + " min no relógio"));
+    }
+    b.appendChild(linha);
   }
   return b;
 }
@@ -373,8 +466,8 @@ function verHoje() {
   const alvo = $("#sessoesHoje");
   alvo.className = "";
   alvo.textContent = "";
-  const sessoes = G.dados.sessoes.filter((s) => s.data === dISO);
-  const feitas = atividadesDoDia(dISO);
+  const r = realizadoPorSessao(dISO);
+  const sessoes = r.sessoes;
   if (!sessoes.length) {
     const f = el("div", "folga");
     f.appendChild(el("b", null, "Descanso"));
@@ -383,7 +476,8 @@ function verHoje() {
     alvo.appendChild(f);
     return;
   }
-  sessoes.forEach((s) => alvo.appendChild(pintaSessao(s, feitas)));
+  sessoes.forEach((s, i) => alvo.appendChild(
+    pintaSessao(s, cred.chave ? estadoDa(s, r.feito[i]) : null)));
 }
 
 /* ---------------------------------------------------------------- SEMANA */
@@ -401,22 +495,48 @@ function verSemana() {
   for (let i = 0; i < 7; i++) {
     const dia = new Date(dedata(w.inicio).getTime() + i * 864e5);
     const dISO2 = iso(dia);
-    const sess = G.dados.sessoes.filter((s) => s.data === dISO2);
-    const feitas = atividadesDoDia(dISO2);
+    const r = realizadoPorSessao(dISO2);
     const c = el("div", "cartao");
     c.style.setProperty("--linha", dISO2 === dISO ? "var(--ouro)" : "var(--risco)");
     c.appendChild(el("h3", null, DIAS[dia.getDay()] + " " + dia.getDate()));
-    if (!sess.length) { c.appendChild(el("p", null, "Descanso.")); }
-    sess.forEach((s) => {
-      const casada = feitas.find((a) => String(a.type || "") === s.tipo);
-      const linha = el("p", null, s.modalidade + " · " + s.titulo + " · " +
-        s.minutos + " min" + (casada ? "  ✓ " + Math.round(minutosDe(casada)) + " min" : ""));
-      if (casada) linha.style.color = "var(--seguir)";
-      c.appendChild(linha);
-    });
+    if (!r.sessoes.length) { c.appendChild(el("p", null, "Descanso.")); }
+    r.sessoes.forEach((s, j) => c.appendChild(
+      sessaoExpansivel(s, cred.chave ? estadoDa(s, r.feito[j]) : null,
+                       dISO2 === dISO)));
     alvo.appendChild(c);
   }
   pintaVeredito();
+}
+
+/* Ele ajusta as coisas na véspera. Sem isto, para saber o que precisava
+   preparar para a natação ele tinha que abrir o Intervals.icu. */
+function sessaoExpansivel(s, est, aberta) {
+  const d = el("details", "sess");
+  d.open = !!aberta;
+  d.style.setProperty("--cor", CORES[s.modalidade] || "var(--ouro)");
+
+  const sum = el("summary");
+  const esq = el("div", "sum-esq");
+  esq.appendChild(el("span", "sum-mod", s.modalidade));
+  esq.appendChild(el("span", "sum-tit", s.titulo));
+  if (est) esq.appendChild(chipDe(est, s.minutos));
+  sum.appendChild(esq);
+
+  const dir = el("div", "sum-dir");
+  dir.appendChild(el("div", "sum-min", s.minutos + " min"));
+  if (s.metros) dir.appendChild(el("div", "sessao-zona", s.metros + " m"));
+  sum.appendChild(dir);
+  d.appendChild(sum);
+
+  if (s.zona) d.appendChild(el("div", "sessao-zona", s.zona));
+  if (s.passos.length) d.appendChild(el("div", "passos", s.passos.join("\n")));
+  if (s.descricao) d.appendChild(el("div", "obs", s.descricao));
+  if (s.observacoes) d.appendChild(el("div", "obs", s.observacoes));
+  if (est && est.chave !== "nao") {
+    d.appendChild(el("div", "realizado",
+      Math.round(est.min) + " de " + s.minutos + " min registrados no relógio."));
+  }
+  return d;
 }
 
 /* O veredito usa os MESMOS limiares do motor em Python: eles vêm no
@@ -743,6 +863,72 @@ function verAjustes() {
     ". Nada aqui substitui treinador.";
 }
 
+/* ---------------------------------------------------------------- instalar */
+/* No Android o Chrome oferece a instalação por um evento, e aí dá para um
+   botão de verdade. No iPhone o Safari não oferece nada: só resta ensinar o
+   caminho. Antes não havia nem uma coisa nem outra, e não dava para achar. */
+let promptInstalar = null;
+const instalado = () =>
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+const ehIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const dispensou = () => {
+  try { return localStorage.getItem("instalar_dispensado") === "1"; }
+  catch (e) { return false; }
+};
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  promptInstalar = e;
+  pintaInstalar();
+});
+window.addEventListener("appinstalled", () => {
+  promptInstalar = null;
+  pintaInstalar();
+});
+
+function pintaInstalar() {
+  const caixa = $("#instalar");
+  caixa.textContent = "";
+  if (instalado() || dispensou()) { caixa.className = ""; return; }
+
+  caixa.appendChild(el("h3", null, "Instalar na tela de início"));
+  if (promptInstalar) {
+    caixa.appendChild(el("p", null,
+      "Instalado, ele abre em tela cheia como qualquer app, e o treino do dia " +
+      "funciona sem internet."));
+    const b = el("button", "acao principal", "Instalar agora");
+    b.addEventListener("click", async () => {
+      const p = promptInstalar;
+      promptInstalar = null;
+      if (p) { await p.prompt(); }
+      pintaInstalar();
+    });
+    caixa.appendChild(b);
+  } else if (ehIOS()) {
+    caixa.appendChild(el("p", null,
+      "No iPhone a instalação é manual, pelo Safari:"));
+    const ol = el("ol");
+    ["Toque no botão de compartilhar (o quadrado com a seta para cima).",
+     "Role e escolha “Adicionar à Tela de Início”.",
+     "Confirme. O ícone preto e dourado aparece junto dos seus apps."]
+      .forEach((t) => ol.appendChild(el("li", null, t)));
+    caixa.appendChild(ol);
+  } else {
+    caixa.appendChild(el("p", null,
+      "No Chrome do Android: menu de três pontos → “Instalar app” " +
+      "ou “Adicionar à tela inicial”. No computador, o ícone de " +
+      "instalar aparece na barra de endereço."));
+  }
+  const dispensar = el("button", "acao", "Agora não");
+  dispensar.addEventListener("click", () => {
+    try { localStorage.setItem("instalar_dispensado", "1"); } catch (e) {}
+    pintaInstalar();
+  });
+  caixa.appendChild(dispensar);
+  caixa.className = "on";
+}
+
 /* ---------------------------------------------------------------- navegação */
 function mostrar(v) {
   ["hoje", "semana", "evolucao", "ajustes"].forEach((n) => {
@@ -800,6 +986,7 @@ async function atualizar(forcar) {
     return;
   }
   mostrar("hoje");
+  pintaInstalar();
   if (!cred.chave) {
     aviso("Primeira vez? Vá em Ajustes e cole a chave do Intervals.icu para " +
       "ver o que você treinou. O plano do dia já funciona sem ela.");
