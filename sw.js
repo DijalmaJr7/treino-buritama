@@ -7,9 +7,11 @@
 // O que NUNCA é guardado aqui: as chamadas à API do Intervals.icu. Elas
 // trazem dado que muda e levam a chave no cabeçalho — passam direto.
 
-const CACHE = 'treino-v1';
-const CASCA = ['./', './index.html', './dados.json',
-               './icon-192.png', './icon-512.png', './manifest.json'];
+// Trocar o número força o celular a descartar a casca antiga.
+const CACHE = 'treino-v2';
+const CASCA = ['./', './index.html', './dados.json', './manifest.json',
+               './icon-192.png', './icon-512.png', './icon-maskable-192.png',
+               './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CASCA)).then(() => self.skipWaiting()));

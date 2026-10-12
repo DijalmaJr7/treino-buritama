@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
-<title>Treino Buritama</title>
+<title>Revest · Treino</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0A0A0A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Treino">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Revest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -199,6 +200,91 @@ label{display:block;font-size:.8rem;color:var(--fumaca);margin-bottom:.3rem}
 .carregando{color:var(--fumaca)}
 footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
   color:var(--fumaca);font-size:.76rem;line-height:1.6}
+/* ==========================================================================
+   Camada "amigável" (12/10/2026). Mesma identidade Revest: preto e dourado,
+   Archivo condensada, flat, border-radius 0, sem sombra nem gradiente.
+   ========================================================================== */
+.marca span{color:var(--fumaca);font-variation-settings:'wdth' 74,'wght' 600;
+  letter-spacing:.18em;font-size:.72rem;margin-left:.55rem}
+
+/* saudação e data */
+.data .sem{text-transform:none;letter-spacing:0}
+
+/* o ciclo até a prova: em que fase estou e quanto falta */
+.ciclo{margin:0 0 1.3rem;padding:.8rem .9rem;background:var(--carvao);
+  border:1px solid var(--risco);border-left:5px solid var(--ouro)}
+.ciclo-fase{font-variation-settings:'wdth' 72,'wght' 700;text-transform:uppercase;
+  letter-spacing:.07em;font-size:.95rem;color:var(--ouro)}
+.ciclo-frase{color:var(--osso);font-size:.88rem;margin-top:.15rem}
+.barra{height:6px;background:var(--risco);margin-top:.7rem;position:relative}
+.barra i{position:absolute;left:0;top:0;bottom:0;background:var(--ouro)}
+.barra-leg{display:flex;justify-content:space-between;color:var(--fumaca);
+  font-size:.72rem;letter-spacing:.04em;margin-top:.3rem}
+
+/* resumo do dia */
+.resumo-dia{font-variation-settings:'wdth' 80,'wght' 700;color:var(--fumaca);
+  font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;margin:0 0 .7rem}
+
+/* cartão da sessão */
+.sessao{background:var(--carvao);border:1px solid var(--risco);
+  border-left:5px solid var(--cor,var(--ouro));padding:.85rem .9rem;margin-bottom:1rem}
+.sessao .realizado{margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--risco)}
+
+/* passos em linhas, como no relógio: duração numa coluna, alvo na outra */
+.passos.estr{white-space:normal;background:var(--preto);border-left:0;
+  border:1px solid var(--risco);padding:.55rem .7rem}
+.bloco + .bloco{margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--risco)}
+.bloco-tit{display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;
+  font-variation-settings:'wdth' 76,'wght' 700;font-size:.7rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ouro)}
+.bloco-tit .vezes{color:var(--osso)}
+.passo{display:flex;gap:.75rem;align-items:baseline;padding:.12rem 0;line-height:1.35}
+.passo .dur{flex:0 0 4.6rem;font-variation-settings:'wdth' 78,'wght' 700;white-space:nowrap}
+.passo .txt{flex:1;min-width:0}
+.passo .nota{color:var(--fumaca)}
+.passo .lap{display:block;color:var(--fumaca);font-size:.76rem}
+.opcional{opacity:.6}
+.tag{display:inline-block;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;
+  border:1px solid currentColor;padding:0 .3rem;color:var(--fumaca);line-height:1.5;
+  font-variation-settings:'wdth' 84,'wght' 700;vertical-align:middle}
+
+/* "por que este treino": a explicação existe, mas não disputa com o treino */
+details.porque{margin-top:.45rem}
+details.porque > summary{list-style:none;cursor:pointer;min-height:44px;display:flex;
+  align-items:center;color:var(--ouro);font-size:.8rem;letter-spacing:.04em;
+  font-variation-settings:'wdth' 84,'wght' 600}
+details.porque > summary::-webkit-details-marker{display:none}
+details.porque > summary::before{content:"+";width:1.1rem;font-variation-settings:'wght' 800}
+details.porque[open] > summary::before{content:"–"}
+details.porque > summary:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+details.porque .obs{margin-top:0}
+
+/* a semana em sete quadrados */
+.faixa{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:.5rem 0 1.1rem}
+.faixa button{min-height:62px;background:var(--carvao);border:1px solid var(--risco);
+  border-radius:0;color:var(--fumaca);font-family:inherit;cursor:pointer;padding:.3rem 0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem}
+.faixa button:focus-visible{outline:2px solid var(--ouro);outline-offset:1px}
+.faixa .l{font-size:.64rem;letter-spacing:.08em;font-variation-settings:'wdth' 80,'wght' 700}
+.faixa .n{font-size:1.05rem;line-height:1;color:var(--osso);font-variation-settings:'wdth' 72,'wght' 700}
+.faixa .q{width:10px;height:10px;border:1px solid var(--fumaca)}
+.faixa .q.feito{background:var(--seguir);border-color:var(--seguir)}
+.faixa .q.parcial{background:var(--segurar);border-color:var(--segurar)}
+.faixa .q.falta{border-color:var(--cortar)}
+.faixa .q.folga{border-color:var(--risco);background:var(--risco)}
+.faixa button.hoje{border-color:var(--ouro)}
+.faixa button.hoje .l{color:var(--ouro)}
+.faixa-leg{display:flex;flex-wrap:wrap;gap:.9rem;color:var(--fumaca);font-size:.72rem;
+  margin:-.5rem 0 1.1rem}
+.faixa-leg span{display:inline-flex;align-items:center;gap:.35rem}
+.faixa-leg i{width:9px;height:9px;border:1px solid var(--fumaca);display:inline-block}
+
+/* placar da semana */
+.placar{margin:.3rem 0 .9rem}
+.placar-num{font-variation-settings:'wdth' 70,'wght' 800;font-size:2.2rem;line-height:1}
+.placar-num small{font-size:.85rem;color:var(--fumaca);font-variation-settings:'wdth' 88,'wght' 500;
+  margin-left:.3rem}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -206,7 +292,7 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
 
 <main>
   <div class="topo">
-    <div class="marca">REVEST</div>
+    <div class="marca">REVEST<span>TREINO</span></div>
     <div class="ctx"><b id="ctxSemana">—</b><span id="ctxProva"></span></div>
   </div>
 
@@ -218,12 +304,16 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
       <div class="sem" id="diaSemana">carregando</div>
       <div class="num" id="diaNumero">—</div>
     </div>
+    <div id="ciclo"></div>
     <div id="sessoesHoje" class="carregando">Abrindo o plano…</div>
   </section>
 
   <!-- ============================ SEMANA ============================ -->
   <section id="v-semana" hidden>
-    <h2 class="secao">A semana</h2>
+    <h2 class="secao" id="semanaTitulo">A semana</h2>
+    <div class="placar" id="semanaPlacar"></div>
+    <div class="faixa" id="faixa" aria-label="Os sete dias da semana"></div>
+    <div class="faixa-leg" id="faixaLeg"></div>
     <p class="legenda" id="semanaResumo">—</p>
     <div id="semanaDias"></div>
     <h2 class="secao">Veredito da semana passada</h2>
@@ -240,20 +330,15 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
   <!-- ============================ ZONAS ============================ -->
   <section id="v-zonas" hidden>
     <h2 class="secao">Zonas</h2>
-    <div class="cartao" style="--linha:var(--ouro)">
-      <h3>Isto é uma cópia para consulta</h3>
-      <p><b>Mudar não dá, e não adiantaria:</b> esta tabela não manda em nada.
-        Os números de verdade ficam em dois lugares, e cada um muda uma coisa
-        diferente.</p>
-      <p><b>Alvos de FC</b> (<code>Z2 HR</code>): quem traduz a zona em
-        batimentos, na hora de mandar para o relógio, é o Intervals.icu em
-        <b>Settings → Zones</b>. É lá que se muda.</p>
-      <p><b>Alvos de ritmo</b> (<code>5:20/km</code>, <code>2:30/100m</code>):
-        vão <b>literais</b> do plano para o relógio. Mudar no Intervals.icu não
-        altera nada — tem que mudar no plano, no computador.</p>
-      <p>No computador, <code>python sync.py zonas</code> lê as zonas da sua
-        conta e avisa se elas divergem desta tabela.</p>
-    </div>
+    <p class="legenda">Sua referência rápida para a beira da piscina e da
+      estrada. É só consulta: mudar aqui não muda o relógio.</p>
+    <details class="porque">
+      <summary>Onde se mudam as zonas de verdade?</summary>
+      <p class="obs"><b>FC</b> (Z2, Z3…): no Intervals.icu, em
+        Settings → Zones. É de lá que o relógio tira os batimentos.</p>
+      <p class="obs"><b>Ritmo</b> (5:20/km, 2:30/100m): vai escrito no plano.
+        Para mudar, peça ao Claude no computador.</p>
+    </details>
     <p class="legenda" id="zonasNota"></p>
     <div id="zonas"></div>
   </section>
@@ -501,6 +586,93 @@ function semanaDe(d) {
   return G.dados.semanas.find((w) => d >= w.inicio && d <= w.fim) || null;
 }
 
+/* Os passos como o relógio mostra: duração numa coluna, alvo na outra. O
+   opcional aparece apagado e marcado — dá para pular com o lap. Tudo vem
+   pronto do dados.json (passos_estruturados); o app só desenha. */
+function pintaPassos(s) {
+  const blocos = s.passos_estruturados || [];
+  if (!blocos.length) {
+    return passosDe(s).length ? el("div", "passos", passosDe(s).join("\n")) : null;
+  }
+  const caixa = el("div", "passos estr");
+  blocos.forEach((b) => {
+    const bloco = el("div", "bloco" + (b.opcional ? " opcional" : ""));
+    if (b.titulo || b.vezes > 1 || b.opcional) {
+      const t = el("div", "bloco-tit");
+      if (b.titulo) t.appendChild(el("span", null, b.titulo));
+      if (b.vezes > 1) t.appendChild(el("span", "vezes", "× " + b.vezes));
+      if (b.opcional) t.appendChild(el("span", "tag", "opcional"));
+      bloco.appendChild(t);
+    }
+    b.passos.forEach((ps) => {
+      const solto = ps.opcional && !b.opcional;
+      const linha = el("div", "passo" + (solto ? " opcional" : ""));
+      linha.appendChild(el("span", "dur", ps.duracao));
+      const txt = el("span", "txt");
+      if (ps.nota) txt.appendChild(el("span", "nota", ps.nota + (ps.alvo ? " · " : "")));
+      if (ps.alvo) txt.appendChild(document.createTextNode(ps.alvo));
+      if (solto) { txt.appendChild(document.createTextNode(" ")); txt.appendChild(el("span", "tag", "opcional")); }
+      if (ps.lap) txt.appendChild(el("span", "lap", "aperte o lap para seguir"));
+      linha.appendChild(txt);
+      bloco.appendChild(linha);
+    });
+    caixa.appendChild(bloco);
+  });
+  return caixa;
+}
+
+/* A explicação existe, mas fica recolhida: o herói é o treino. */
+function porQue(s) {
+  if (!s.observacoes) return null;
+  const d = el("details", "porque");
+  d.appendChild(el("summary", null, "Por que este treino"));
+  d.appendChild(el("div", "obs", s.observacoes));
+  return d;
+}
+
+const fmtData = (dt) => dt.getDate() + " " + MESES[dt.getMonth()];
+const saudacao = () => {
+  const h = new Date().getHours();
+  return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+};
+
+/* Em que fase do ciclo ele está, em palavras, e quanto do caminho até a
+   prova já foi. O tipo da semana vem calculado do Python. */
+const FASES = {
+  "carga": ["Semana de carga", "O volume sobe. Durma bem e beba água."],
+  "recuperação": ["Semana de recuperação",
+    "Volume menor de propósito: é agora que o corpo absorve o treino."],
+  "polimento": ["Polimento",
+    "Menos volume, a mesma intensidade: chegar inteiro em Buritama."],
+  "calibração": ["Calibração", "Primeiros dias: calibrar cinta, relógio e sensações."],
+};
+function pintaCiclo(d, w) {
+  const c = $("#ciclo");
+  c.textContent = "";
+  c.className = "";
+  if (!w) return;
+  c.className = "ciclo";
+  const fase = FASES[w.tipo] || ["Semana " + w.numero, ""];
+  c.appendChild(el("div", "ciclo-fase", fase[0]));
+  const frase = (fase[1] + (w.repete
+    ? " Esta semana repete o treino da semana " + w.repete + "." : "")).trim();
+  if (frase) c.appendChild(el("div", "ciclo-frase", frase));
+  const ini = dedata(G.dados.inicio), fim = dedata(G.dados.prova.data);
+  const pct = Math.round(Math.min(1, Math.max(0, (d - ini) / (fim - ini))) * 100);
+  const barra = el("div", "barra");
+  barra.setAttribute("role", "img");
+  barra.setAttribute("aria-label", pct + "% do caminho até a prova");
+  const cheio = el("i");
+  cheio.style.width = pct + "%";
+  barra.appendChild(cheio);
+  c.appendChild(barra);
+  const leg = el("div", "barra-leg");
+  leg.appendChild(el("span", null, "início " + fmtData(ini)));
+  leg.appendChild(el("span", null, pct + "% do caminho"));
+  leg.appendChild(el("span", null, "prova " + fmtData(fim)));
+  c.appendChild(leg);
+}
+
 /* ---------------------------------------------------------------- HOJE */
 function pintaSessao(s, est) {
   const b = el("div", "sessao");
@@ -513,9 +685,11 @@ function pintaSessao(s, est) {
   b.appendChild(topo);
   b.appendChild(el("div", "sessao-tit", s.titulo));
   if (s.zona) b.appendChild(el("div", "sessao-zona", s.zona));
-  if (passosDe(s).length) b.appendChild(el("div", "passos", passosDe(s).join("\n")));
+  const passos = pintaPassos(s);
+  if (passos) b.appendChild(passos);
   if (s.descricao) b.appendChild(el("div", "obs", s.descricao));
-  if (s.observacoes) b.appendChild(el("div", "obs", s.observacoes));
+  const pq = porQue(s);
+  if (pq) b.appendChild(pq);
 
   if (est) {
     const linha = el("div", "realizado");
@@ -531,7 +705,7 @@ function pintaSessao(s, est) {
 
 function verHoje() {
   const d = hoje(), dISO = iso(d);
-  $("#diaSemana").textContent = DIAS[d.getDay()];
+  $("#diaSemana").textContent = saudacao() + ", Dijalma · " + DIAS[d.getDay()];
   $("#diaNumero").textContent = d.getDate() + " " + MESES[d.getMonth()];
 
   const w = semanaDe(dISO);
@@ -541,6 +715,7 @@ function verHoje() {
     : "fora do plano";
   const faltam = Math.round((dedata(G.dados.prova.data) - d) / 864e5);
   $("#ctxProva").textContent = faltam >= 0 ? faltam + " dias para a prova" : "prova realizada";
+  pintaCiclo(d, w);
 
   const alvo = $("#sessoesHoje");
   alvo.className = "";
@@ -553,6 +728,10 @@ function verHoje() {
     f.appendChild(el("div", null,
       "Nenhuma sessão programada hoje. O descanso está no plano de propósito."));
     alvo.appendChild(f);
+  } else {
+    const total = sessoes.reduce((a, s) => a + (s.minutos || 0), 0);
+    alvo.appendChild(el("div", "resumo-dia", "Hoje · " + sessoes.length +
+      (sessoes.length === 1 ? " treino" : " treinos") + " · " + total + " min"));
   }
   sessoes.forEach((s, i) => alvo.appendChild(
     pintaSessao(s, cred.chave ? estadoDa(s, r.feito[i]) : null)));
@@ -595,16 +774,17 @@ function verSemana() {
   const d = hoje(), dISO = iso(d);
   const w = semanaDe(dISO) || G.dados.semanas[0];
   const real = realizadoPorSemana()[w.numero] || 0;
+  $("#semanaTitulo").textContent = (w.numero === 0 ? "Calibração"
+    : "Semana " + w.numero + " de " + G.dados.total_semanas) + " · " + w.tipo;
+  pintaPlacar(w, real);
+  pintaFaixa(w, dISO);
   $("#semanaResumo").textContent =
-    "Semana " + w.numero + (w.taper ? " (taper)" : "") + " · previsto " +
-    w.minutos + " min, sendo " + w.minutos_comparaveis +
-    " min que contam (sem academia e sem trechos opcionais) · feito até agora " +
-    Math.round(real) + " min." +
+    "Contam natação, bike e corrida. Academia e trechos opcionais ficam de fora." +
     (w.repete ? " Esta semana repete o treino da semana " + w.repete +
-                "; o treino original dela saiu do plano." : "") +
-    (G.dados.semanas_perdidas ? " Semanas do plano perdidas por repetição: " +
-       G.dados.semanas_perdidas + ". A prova e o polimento continuam nas datas " +
-       "de sempre." : "");
+                ", e o treino original dela saiu do plano." : "") +
+    (G.dados.semanas_perdidas ? " Semanas perdidas por repetição: " +
+       G.dados.semanas_perdidas + ". A prova continua em " +
+       fmtData(dedata(G.dados.prova.data)) + "." : "");
 
   const alvo = $("#semanaDias");
   alvo.textContent = "";
@@ -613,6 +793,7 @@ function verSemana() {
     const dISO2 = iso(dia);
     const r = realizadoPorSessao(dISO2);
     const c = el("div", "cartao");
+    c.id = "dia-" + dISO2;
     c.style.setProperty("--linha", dISO2 === dISO ? "var(--ouro)" : "var(--risco)");
     c.appendChild(el("h3", null, DIAS[dia.getDay()] + " " + dia.getDate()));
     if (!r.sessoes.length) { c.appendChild(el("p", null, "Descanso.")); }
@@ -624,6 +805,80 @@ function verSemana() {
     alvo.appendChild(c);
   }
   pintaVeredito();
+}
+
+/* Quanto da semana já foi feito, em número grande e numa barra. */
+function pintaPlacar(w, real) {
+  const p = $("#semanaPlacar");
+  p.textContent = "";
+  if (!cred.chave) {
+    p.appendChild(el("p", "legenda",
+      "Cole a chave do Intervals.icu em Ajustes para ver aqui o que você já fez."));
+    return;
+  }
+  const prev = w.minutos_comparaveis || 0;
+  const num = el("div", "placar-num", String(Math.round(real)));
+  num.appendChild(el("small", null, "de " + prev + " min feitos"));
+  p.appendChild(num);
+  const barra = el("div", "barra");
+  const cheio = el("i");
+  cheio.style.width = Math.round(Math.min(1, prev ? real / prev : 0) * 100) + "%";
+  barra.appendChild(cheio);
+  p.appendChild(barra);
+}
+
+/* Como foi cada dia, num quadrado: feito, parcial, faltou ou descanso. Só
+   conta o que é devido — sessão toda opcional nunca vira falta. */
+const LETRA_DIA = ["D", "S", "T", "Q", "Q", "S", "S"];
+function estadoDoDia(dISO2, hojeISO) {
+  const r = realizadoPorSessao(dISO2);
+  if (!r.sessoes.length) return "folga";
+  if (!cred.chave || dISO2 > hojeISO) return "";
+  const estados = r.sessoes.map((s, i) => ({ s: s, e: estadoDa(s, r.feito[i]) }));
+  const devidos = estados.filter((x) => exigidos(x.s) > 0);
+  if (!devidos.length) {
+    return estados.some((x) => x.e.chave === "feito") ? "feito" : "folga";
+  }
+  if (devidos.every((x) => x.e.chave === "feito")) return "feito";
+  if (devidos.some((x) => x.e.chave !== "nao")) return "parcial";
+  return dISO2 < hojeISO ? "falta" : "";
+}
+function pintaFaixa(w, hojeISO) {
+  const f = $("#faixa");
+  f.textContent = "";
+  const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for (let i = 0; i < 7; i++) {
+    const dia = new Date(dedata(w.inicio).getTime() + i * 864e5);
+    const dISO2 = iso(dia);
+    const estado = estadoDoDia(dISO2, hojeISO);
+    const b = el("button", dISO2 === hojeISO ? "hoje" : null);
+    b.type = "button";
+    b.setAttribute("aria-label", DIAS[dia.getDay()] + " " + dia.getDate() +
+      ({ feito: ": feito", parcial: ": parcial", falta: ": não feito",
+         folga: ": descanso" }[estado] || ""));
+    b.appendChild(el("span", "l", LETRA_DIA[dia.getDay()]));
+    b.appendChild(el("span", "n", String(dia.getDate())));
+    b.appendChild(el("span", "q " + estado));
+    b.addEventListener("click", () => {
+      const alvo = document.getElementById("dia-" + dISO2);
+      if (alvo) alvo.scrollIntoView({ behavior: suave ? "smooth" : "auto", block: "start" });
+    });
+    f.appendChild(b);
+  }
+  const leg = $("#faixaLeg");
+  leg.textContent = "";
+  if (!cred.chave) return;
+  [["feito", "var(--seguir)", true], ["parcial", "var(--segurar)", true],
+   ["faltou", "var(--cortar)", false], ["descanso", "var(--risco)", true]]
+    .forEach(([nome, cor, cheio]) => {
+      const sp = el("span");
+      const q = el("i");
+      q.style.borderColor = cor;
+      if (cheio) q.style.background = cor;
+      sp.appendChild(q);
+      sp.appendChild(document.createTextNode(nome));
+      leg.appendChild(sp);
+    });
 }
 
 /* Ele ajusta as coisas na véspera. Sem isto, para saber o que precisava
@@ -647,9 +902,11 @@ function sessaoExpansivel(s, est, aberta) {
   d.appendChild(sum);
 
   if (s.zona) d.appendChild(el("div", "sessao-zona", s.zona));
-  if (passosDe(s).length) d.appendChild(el("div", "passos", passosDe(s).join("\n")));
+  const passos = pintaPassos(s);
+  if (passos) d.appendChild(passos);
   if (s.descricao) d.appendChild(el("div", "obs", s.descricao));
-  if (s.observacoes) d.appendChild(el("div", "obs", s.observacoes));
+  const pq = porQue(s);
+  if (pq) d.appendChild(pq);
   if (est && est.chave !== "nao") {
     d.appendChild(el("div", "realizado",
       feitoDe(est, s) + " registrados no relógio."));
