@@ -375,7 +375,13 @@ async function buscarTreinos(forcar) {
    conta, porque o relógio não grava musculação — a mesma regra do motor. */
 const contaCarga = (a) =>
   !(G.dados.limiares.tipos_nao_contados || []).includes(String(a.type || ""));
-const minutosDe = (a) => (a.moving_time || a.elapsed_time || 0) / 60;
+/* Natação conta o tempo TOTAL: o plano inclui os descansos na borda. A lista
+   vem de rules.py, a mesma que o motor usa. */
+const minutosDe = (a) => {
+  const total = (G.dados.limiares.tipos_tempo_total || []).includes(String(a.type || ""));
+  const s = total ? (a.elapsed_time || a.moving_time) : (a.moving_time || a.elapsed_time);
+  return (s || 0) / 60;
+};
 const dataDe = (a) => String(a.start_date_local || a.start_date || "").slice(0, 10);
 
 function realizadoPorSemana() {
@@ -394,52 +400,72 @@ const atividadesDoDia = (d) => G.ativ.filter((a) => dataDe(a) === d);
 /* Três estados, como na assessoria: concluído, parcial, não feito.
    Antes bastava existir uma atividade do mesmo tipo no dia para marcar
    "feito" — por isso um treino pela metade aparecia como completo.
-   Agora compara MINUTO A MINUTO contra o previsto. */
+   Agora compara contra o previsto: minutos, ou metros na natação. */
 const COMPLETO = 0.90;   /* daqui para cima, concluído */
 
 function realizadoPorSessao(dISO) {
   const sessoes = G.dados.sessoes.filter((s) => s.data === dISO);
   const feitas = atividadesDoDia(dISO);
-  const porTipo = {}, planPorTipo = {};
+  const porTipo = {}, metrosPorTipo = {}, planPorTipo = {}, planMetrosPorTipo = {};
   feitas.forEach((a) => {
     const t = String(a.type || "");
     porTipo[t] = (porTipo[t] || 0) + minutosDe(a);
+    metrosPorTipo[t] = (metrosPorTipo[t] || 0) + (a.distance || 0);
   });
   sessoes.forEach((s) => {
     planPorTipo[s.tipo] = (planPorTipo[s.tipo] || 0) + s.minutos;
+    planMetrosPorTipo[s.tipo] = (planMetrosPorTipo[s.tipo] || 0) + (s.metros || 0);
   });
   /* Dois treinos do mesmo tipo no mesmo dia dividem o realizado na proporção
      do que cada um pedia — senão um levaria o crédito do outro. */
   const mapa = {};
   sessoes.forEach((s, i) => {
-    const total = porTipo[s.tipo] || 0;
     const plano = planPorTipo[s.tipo] || s.minutos || 1;
-    mapa[i] = total * ((s.minutos || 0) / plano);
+    const planoM = planMetrosPorTipo[s.tipo] || s.metros || 1;
+    mapa[i] = {
+      min: (porTipo[s.tipo] || 0) * ((s.minutos || 0) / plano),
+      metros: (metrosPorTipo[s.tipo] || 0) * ((s.metros || 0) / planoM),
+    };
   });
   return { sessoes: sessoes, feito: mapa };
 }
 
-function estadoDa(sessao, minutosFeitos) {
-  const prev = sessao.minutos || 0;
-  const pct = prev ? minutosFeitos / prev : 0;
-  if (minutosFeitos <= 0) {
+/* Natação vai por DISTÂNCIA (o critério vem do dados.json, decidido em
+   Python). O tempo em movimento do relógio não conta a borda da piscina e os
+   minutos do plano contam os descansos: 1100 m nadados de 1100 pedidos
+   apareciam como 88% e "parcial". Sem distância gravada, volta ao tempo. */
+function estadoDa(sessao, feito) {
+  const porMetros = sessao.criterio === "metros" && sessao.metros > 0 && feito.metros > 0;
+  const prev = porMetros ? sessao.metros : (sessao.minutos || 0);
+  const real = porMetros ? feito.metros : feito.min;
+  const pct = prev ? real / prev : 0;
+  if (real <= 0) {
     return { chave: "nao", rotulo: "não feito", pct: 0, min: 0 };
   }
   return {
     chave: pct >= COMPLETO ? "feito" : "parcial",
     rotulo: pct >= COMPLETO ? "concluído" : "parcial",
     pct: pct,
-    min: minutosFeitos,
+    min: feito.min,
+    metros: feito.metros,
+    porMetros: porMetros,
   };
 }
 
-function chipDe(est, previsto) {
+/* "1100 de 1100 m" na natação, "34 de 45 min" no resto. */
+function feitoDe(est, s) {
+  return est.porMetros
+    ? Math.round(est.metros) + " de " + s.metros + " m"
+    : Math.round(est.min) + " de " + s.minutos + " min";
+}
+
+function chipDe(est, s) {
   const c = el("span", "chip " + est.chave);
   c.appendChild(el("i"));
   c.appendChild(document.createTextNode(
     est.chave === "nao" ? est.rotulo
       : est.rotulo + " · " + Math.round(est.pct * 100) + "%"));
-  c.title = Math.round(est.min) + " de " + previsto + " min";
+  c.title = feitoDe(est, s);
   return c;
 }
 
@@ -465,10 +491,10 @@ function pintaSessao(s, est) {
 
   if (est) {
     const linha = el("div", "realizado");
-    linha.appendChild(chipDe(est, s.minutos));
+    linha.appendChild(chipDe(est, s));
     if (est.chave !== "nao") {
       linha.appendChild(document.createTextNode(
-        "  " + Math.round(est.min) + " de " + s.minutos + " min no relógio"));
+        "  " + feitoDe(est, s) + " no relógio"));
     }
     b.appendChild(linha);
   }
@@ -543,7 +569,7 @@ function sessaoExpansivel(s, est, aberta) {
   const esq = el("div", "sum-esq");
   esq.appendChild(el("span", "sum-mod", s.modalidade));
   esq.appendChild(el("span", "sum-tit", s.titulo));
-  if (est) esq.appendChild(chipDe(est, s.minutos));
+  if (est) esq.appendChild(chipDe(est, s));
   sum.appendChild(esq);
 
   const dir = el("div", "sum-dir");
@@ -558,7 +584,7 @@ function sessaoExpansivel(s, est, aberta) {
   if (s.observacoes) d.appendChild(el("div", "obs", s.observacoes));
   if (est && est.chave !== "nao") {
     d.appendChild(el("div", "realizado",
-      Math.round(est.min) + " de " + s.minutos + " min registrados no relógio."));
+      feitoDe(est, s) + " registrados no relógio."));
   }
   return d;
 }
