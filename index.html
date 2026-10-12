@@ -143,6 +143,10 @@ details.sess > summary:focus-visible{outline:2px solid var(--ouro);outline-offse
 details.sess[open] > summary{margin-bottom:.5rem}
 details.sess .passos{font-size:.86rem}
 .amanha{margin-top:1.8rem}
+/* Força é cinza de propósito: trabalho de suporte, visualmente mais quieto. */
+.academia{border-left:5px solid var(--m-forca);padding:.55rem .8rem;margin:.6rem 0;
+  color:var(--fumaca);font-size:.86rem}
+.academia .sum-mod{color:var(--m-forca)}
 
 /* ---------- instalar ---------- */
 #instalar{border:1px solid var(--ouro-fraco);background:var(--carvao);
@@ -541,7 +545,24 @@ function verHoje() {
   }
   sessoes.forEach((s, i) => alvo.appendChild(
     pintaSessao(s, cred.chave ? estadoDa(s, r.feito[i]) : null)));
+  const academia = academiaDoDia(d);
+  if (academia) alvo.appendChild(academia);
   pintaAmanha(alvo, d);
+}
+
+/* Academia é com o treinador dele, até 1 h, e fica FORA do plano: aqui só
+   aparece se foi feita ou não. Não entra em minuto previsto nem em
+   cumprimento — nem aqui, nem no motor. */
+function academiaDoDia(dia) {
+  const a = G.dados.academia;
+  if (!a || !(a.dias_js || []).includes(dia.getDay())) return null;
+  const tipos = G.dados.limiares.tipos_nao_contados || [];
+  const feita = atividadesDoDia(iso(dia)).some((x) => tipos.includes(String(x.type || "")));
+  const linha = el("div", "academia");
+  linha.appendChild(el("span", "sum-mod", "Academia"));
+  linha.appendChild(el("span", null, " · com o treinador · " +
+    (!cred.chave ? "fora do plano" : feita ? "feita" : "não registrada")));
+  return linha;
 }
 
 /* Ele prepara o treino na véspera (pé de pato, roupa, garrafa). Num domingo
@@ -553,6 +574,8 @@ function pintaAmanha(alvo, d) {
   bloco.appendChild(el("h2", "secao", "Amanhã · " + DIAS[amanha.getDay()]));
   if (!r.sessoes.length) bloco.appendChild(el("p", "legenda", "Descanso."));
   r.sessoes.forEach((s) => bloco.appendChild(sessaoExpansivel(s, null, false)));
+  const academia = academiaDoDia(amanha);
+  if (academia) bloco.appendChild(academia);
   alvo.appendChild(bloco);
 }
 
@@ -585,6 +608,8 @@ function verSemana() {
     r.sessoes.forEach((s, j) => c.appendChild(
       sessaoExpansivel(s, cred.chave ? estadoDa(s, r.feito[j]) : null,
                        dISO2 === dISO)));
+    const academia = academiaDoDia(dia);
+    if (academia) c.appendChild(academia);
     alvo.appendChild(c);
   }
   pintaVeredito();
