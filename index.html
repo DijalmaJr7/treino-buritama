@@ -142,6 +142,7 @@ details.sess > summary:focus-visible{outline:2px solid var(--ouro);outline-offse
 .sum-min{font-variation-settings:'wdth' 72,'wght' 700;font-size:1.05rem}
 details.sess[open] > summary{margin-bottom:.5rem}
 details.sess .passos{font-size:.86rem}
+.amanha{margin-top:1.8rem}
 
 /* ---------- instalar ---------- */
 #instalar{border:1px solid var(--ouro-fraco);background:var(--carvao);
@@ -206,7 +207,6 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
   </div>
 
   <div id="aviso"></div>
-  <div id="instalar"></div>
 
   <!-- ============================ HOJE ============================ -->
   <section id="v-hoje">
@@ -271,6 +271,9 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
 
     <footer id="rodape"></footer>
   </section>
+
+  <!-- Depois do treino, não antes: o herói da tela é o treino de hoje. -->
+  <div id="instalar"></div>
 </main>
 
 <nav role="tablist">
@@ -400,8 +403,16 @@ const atividadesDoDia = (d) => G.ativ.filter((a) => dataDe(a) === d);
 /* Três estados, como na assessoria: concluído, parcial, não feito.
    Antes bastava existir uma atividade do mesmo tipo no dia para marcar
    "feito" — por isso um treino pela metade aparecia como completo.
-   Agora compara contra o previsto: minutos, ou metros na natação. */
-const COMPLETO = 0.90;   /* daqui para cima, concluído */
+   Agora compara contra o previsto: minutos, ou metros na natação.
+   As faixas são as do TrainingPeaks (verde dentro de 20% do previsto) e vêm
+   de rules.py no dados.json — o app não tem cópia própria delas. */
+const COMPLETO = () => G.dados.limiares.sessao_concluida || 0.80;
+const ACIMA = () => G.dados.limiares.sessao_acima || 1.20;
+/* Trecho opcional ("Final opcional") vai para o relógio, mas não é devido:
+   parar antes dele, como o treino manda no calor, é cumprir o treino. */
+const exigidos = (s) => s.minutos_exigidos || s.minutos || 0;
+const passosDe = (s) =>
+  (s.passos_legiveis && s.passos_legiveis.length) ? s.passos_legiveis : s.passos;
 
 function realizadoPorSessao(dISO) {
   const sessoes = G.dados.sessoes.filter((s) => s.data === dISO);
@@ -436,15 +447,16 @@ function realizadoPorSessao(dISO) {
    apareciam como 88% e "parcial". Sem distância gravada, volta ao tempo. */
 function estadoDa(sessao, feito) {
   const porMetros = sessao.criterio === "metros" && sessao.metros > 0 && feito.metros > 0;
-  const prev = porMetros ? sessao.metros : (sessao.minutos || 0);
+  const prev = porMetros ? sessao.metros : exigidos(sessao);
   const real = porMetros ? feito.metros : feito.min;
   const pct = prev ? real / prev : 0;
   if (real <= 0) {
     return { chave: "nao", rotulo: "não feito", pct: 0, min: 0 };
   }
+  const completo = pct >= COMPLETO();
   return {
-    chave: pct >= COMPLETO ? "feito" : "parcial",
-    rotulo: pct >= COMPLETO ? "concluído" : "parcial",
+    chave: completo ? "feito" : "parcial",
+    rotulo: !completo ? "parcial" : (pct > ACIMA() ? "acima do plano" : "concluído"),
     pct: pct,
     min: feito.min,
     metros: feito.metros,
@@ -452,11 +464,12 @@ function estadoDa(sessao, feito) {
   };
 }
 
-/* "1100 de 1100 m" na natação, "34 de 45 min" no resto. */
+/* "1100 de 1100 m" na natação, "34 de 35 min (+10 opcionais)" no resto. */
 function feitoDe(est, s) {
-  return est.porMetros
-    ? Math.round(est.metros) + " de " + s.metros + " m"
-    : Math.round(est.min) + " de " + s.minutos + " min";
+  if (est.porMetros) return Math.round(est.metros) + " de " + s.metros + " m";
+  const opcionais = (s.minutos || 0) - exigidos(s);
+  return Math.round(est.min) + " de " + exigidos(s) + " min" +
+    (opcionais > 0 ? " (+" + opcionais + " opcionais)" : "");
 }
 
 function chipDe(est, s) {
@@ -485,7 +498,7 @@ function pintaSessao(s, est) {
   b.appendChild(topo);
   b.appendChild(el("div", "sessao-tit", s.titulo));
   if (s.zona) b.appendChild(el("div", "sessao-zona", s.zona));
-  if (s.passos.length) b.appendChild(el("div", "passos", s.passos.join("\n")));
+  if (passosDe(s).length) b.appendChild(el("div", "passos", passosDe(s).join("\n")));
   if (s.descricao) b.appendChild(el("div", "obs", s.descricao));
   if (s.observacoes) b.appendChild(el("div", "obs", s.observacoes));
 
@@ -508,7 +521,8 @@ function verHoje() {
 
   const w = semanaDe(dISO);
   $("#ctxSemana").textContent = w
-    ? (w.numero === 0 ? "calibração" : "semana " + w.numero + "/" + G.dados.total_semanas)
+    ? (w.numero === 0 ? "calibração" : "semana " + w.numero + "/" +
+       G.dados.total_semanas + (w.repete ? " · repete a " + w.repete : ""))
     : "fora do plano";
   const faltam = Math.round((dedata(G.dados.prova.data) - d) / 864e5);
   $("#ctxProva").textContent = faltam >= 0 ? faltam + " dias para a prova" : "prova realizada";
@@ -524,10 +538,22 @@ function verHoje() {
     f.appendChild(el("div", null,
       "Nenhuma sessão programada hoje. O descanso está no plano de propósito."));
     alvo.appendChild(f);
-    return;
   }
   sessoes.forEach((s, i) => alvo.appendChild(
     pintaSessao(s, cred.chave ? estadoDa(s, r.feito[i]) : null)));
+  pintaAmanha(alvo, d);
+}
+
+/* Ele prepara o treino na véspera (pé de pato, roupa, garrafa). Num domingo
+   à noite a aba Semana ainda mostra a semana que acaba; o amanhã fica aqui. */
+function pintaAmanha(alvo, d) {
+  const amanha = new Date(d.getTime() + 864e5);
+  const r = realizadoPorSessao(iso(amanha));
+  const bloco = el("div", "amanha");
+  bloco.appendChild(el("h2", "secao", "Amanhã · " + DIAS[amanha.getDay()]));
+  if (!r.sessoes.length) bloco.appendChild(el("p", "legenda", "Descanso."));
+  r.sessoes.forEach((s) => bloco.appendChild(sessaoExpansivel(s, null, false)));
+  alvo.appendChild(bloco);
 }
 
 /* ---------------------------------------------------------------- SEMANA */
@@ -538,7 +564,13 @@ function verSemana() {
   $("#semanaResumo").textContent =
     "Semana " + w.numero + (w.taper ? " (taper)" : "") + " · previsto " +
     w.minutos + " min, sendo " + w.minutos_comparaveis +
-    " min que o relógio grava · feito até agora " + Math.round(real) + " min.";
+    " min que contam (sem academia e sem trechos opcionais) · feito até agora " +
+    Math.round(real) + " min." +
+    (w.repete ? " Esta semana repete o treino da semana " + w.repete +
+                "; o treino original dela saiu do plano." : "") +
+    (G.dados.semanas_perdidas ? " Semanas do plano perdidas por repetição: " +
+       G.dados.semanas_perdidas + ". A prova e o polimento continuam nas datas " +
+       "de sempre." : "");
 
   const alvo = $("#semanaDias");
   alvo.textContent = "";
@@ -579,7 +611,7 @@ function sessaoExpansivel(s, est, aberta) {
   d.appendChild(sum);
 
   if (s.zona) d.appendChild(el("div", "sessao-zona", s.zona));
-  if (s.passos.length) d.appendChild(el("div", "passos", s.passos.join("\n")));
+  if (passosDe(s).length) d.appendChild(el("div", "passos", passosDe(s).join("\n")));
   if (s.descricao) d.appendChild(el("div", "obs", s.descricao));
   if (s.observacoes) d.appendChild(el("div", "obs", s.observacoes));
   if (est && est.chave !== "nao") {
