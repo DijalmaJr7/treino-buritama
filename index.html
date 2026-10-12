@@ -63,7 +63,7 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--carvao)
 /* Cinco abas em 375px: a fonte encolhe e o espaçamento aperta, mas o alvo de
    toque continua com 58px de altura. */
 nav button{flex:1;min-height:58px;padding:0 .1rem;background:none;border:0;
-  border-radius:0;color:var(--fumaca);font-family:inherit;font-size:.66rem;
+  border-radius:0;color:var(--fumaca);font-family:inherit;font-size:.72rem;
   letter-spacing:.04em;font-variation-settings:'wdth' 78,'wght' 600;
   text-transform:uppercase;cursor:pointer;border-top:2px solid transparent}
 nav button[aria-selected="true"]{color:var(--ouro);border-top-color:var(--ouro)}
@@ -112,7 +112,7 @@ code{font-family:ui-monospace,'Consolas',monospace;font-size:.86em;
   margin:0 0 .6rem;padding-bottom:.55rem;border-bottom:1px solid var(--risco)}
 .metricas{display:flex;flex-wrap:wrap;gap:1.3rem;margin-top:.8rem;padding-top:.7rem;
   border-top:1px solid var(--risco)}
-.metricas div{font-size:.68rem;color:var(--fumaca);letter-spacing:.05em}
+.metricas div{font-size:.72rem;color:var(--fumaca);letter-spacing:.05em}
 .metricas b{display:block;color:var(--osso);font-variation-settings:'wdth' 72,'wght' 700;
   font-size:1.35rem;line-height:1.1}
 
@@ -137,7 +137,11 @@ details.sess > summary::-webkit-details-marker{display:none}
 details.sess > summary:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
 .sum-esq{display:flex;flex-direction:column;gap:.15rem}
 .sum-mod{font-variation-settings:'wdth' 74,'wght' 700;font-size:.9rem;
-  text-transform:uppercase;letter-spacing:.05em;color:var(--cor,var(--ouro))}
+  text-transform:uppercase;letter-spacing:.05em;color:var(--osso)}
+/* Em tamanho pequeno a transição (#8C5E12) dá 3,2:1 como texto. A cor da
+   modalidade vira um quadradinho ao lado do nome: como gráfico pede 3:1. */
+.sum-mod::before{content:"";display:inline-block;width:.6rem;height:.6rem;
+  background:var(--cor,var(--ouro));margin-right:.45rem;vertical-align:.05em}
 .sum-tit{font-size:.88rem;color:var(--osso)}
 .sum-dir{text-align:right;white-space:nowrap}
 .sum-min{font-variation-settings:'wdth' 72,'wght' 700;font-size:1.05rem}
@@ -147,7 +151,8 @@ details.sess .passos{font-size:.86rem}
 /* Força é cinza de propósito: trabalho de suporte, visualmente mais quieto. */
 .academia{border-left:5px solid var(--m-forca);padding:.55rem .8rem;margin:.6rem 0;
   color:var(--fumaca);font-size:.86rem}
-.academia .sum-mod{color:var(--m-forca)}
+.academia .sum-mod{color:var(--fumaca)}
+.academia .sum-mod::before{background:var(--m-forca)}
 
 /* ---------- instalar ---------- */
 #instalar{border:1px solid var(--ouro-fraco);background:var(--carvao);
@@ -172,8 +177,8 @@ td.como{color:var(--fumaca)}
 figure{margin:0 0 1.4rem}
 figcaption{color:var(--fumaca);font-size:.78rem;margin-top:.3rem;line-height:1.4}
 svg{display:block;width:100%;height:auto;overflow:visible}
-.gx{fill:var(--fumaca);font-size:9px;font-variation-settings:'wdth' 88,'wght' 500}
-.gv{fill:var(--osso);font-size:10px;font-variation-settings:'wdth' 78,'wght' 700}
+.gx{fill:var(--fumaca);font-size:11px;font-variation-settings:'wdth' 88,'wght' 500}
+.gv{fill:var(--osso);font-size:11px;font-variation-settings:'wdth' 78,'wght' 700}
 .grade{stroke:var(--risco);stroke-width:1}
 .dica{font-size:.8rem;color:var(--osso);background:var(--carvao);
   border:1px solid var(--risco);padding:.45rem .6rem;margin-top:.4rem;min-height:2.1rem}
@@ -243,8 +248,12 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
 .passo .txt{flex:1;min-width:0}
 .passo .nota{color:var(--fumaca)}
 .passo .lap{display:block;color:var(--fumaca);font-size:.76rem}
-.opcional{opacity:.6}
-.tag{display:inline-block;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;
+/* Opcional: tracejado + selo, texto em cinza legível (5,8:1). Transparência
+   derrubava o contraste para 2,75:1, abaixo do mínimo de 4,5:1. */
+.bloco.opcional{border-left:2px dashed var(--fumaca);margin-left:-.7rem;
+  padding-left:calc(.7rem - 2px)}  /* tracejado na borda, colunas alinhadas */
+.bloco.opcional .passo,.passo.opcional{color:var(--fumaca)}
+.tag{display:inline-block;font-size:.6875rem;letter-spacing:.09em;text-transform:uppercase;
   border:1px solid currentColor;padding:0 .3rem;color:var(--fumaca);line-height:1.5;
   font-variation-settings:'wdth' 84,'wght' 700;vertical-align:middle}
 
@@ -265,7 +274,7 @@ details.porque .obs{margin-top:0}
   border-radius:0;color:var(--fumaca);font-family:inherit;cursor:pointer;padding:.3rem 0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem}
 .faixa button:focus-visible{outline:2px solid var(--ouro);outline-offset:1px}
-.faixa .l{font-size:.64rem;letter-spacing:.08em;font-variation-settings:'wdth' 80,'wght' 700}
+.faixa .l{font-size:.6875rem;letter-spacing:.08em;font-variation-settings:'wdth' 80,'wght' 700}
 .faixa .n{font-size:1.05rem;line-height:1;color:var(--osso);font-variation-settings:'wdth' 72,'wght' 700}
 .faixa .q{width:10px;height:10px;border:1px solid var(--fumaca)}
 .faixa .q.feito{background:var(--seguir);border-color:var(--seguir)}
@@ -502,8 +511,7 @@ const ACIMA = () => G.dados.limiares.sessao_acima || 1.20;
 const exigidos = (s) =>
   (s.minutos_exigidos !== undefined && s.minutos_exigidos !== null)
     ? s.minutos_exigidos : (s.minutos || 0);
-const passosDe = (s) =>
-  (s.passos_legiveis && s.passos_legiveis.length) ? s.passos_legiveis : s.passos;
+const passosDe = (s) => s.passos || [];
 
 function realizadoPorSessao(dISO) {
   const sessoes = G.dados.sessoes.filter((s) => s.data === dISO);
