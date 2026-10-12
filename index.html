@@ -414,7 +414,9 @@ const COMPLETO = () => G.dados.limiares.sessao_concluida || 0.80;
 const ACIMA = () => G.dados.limiares.sessao_acima || 1.20;
 /* Trecho opcional ("Final opcional") vai para o relógio, mas não é devido:
    parar antes dele, como o treino manda no calor, é cumprir o treino. */
-const exigidos = (s) => s.minutos_exigidos || s.minutos || 0;
+const exigidos = (s) =>
+  (s.minutos_exigidos !== undefined && s.minutos_exigidos !== null)
+    ? s.minutos_exigidos : (s.minutos || 0);
 const passosDe = (s) =>
   (s.passos_legiveis && s.passos_legiveis.length) ? s.passos_legiveis : s.passos;
 
@@ -451,6 +453,14 @@ function realizadoPorSessao(dISO) {
    apareciam como 88% e "parcial". Sem distância gravada, volta ao tempo. */
 function estadoDa(sessao, feito) {
   const porMetros = sessao.criterio === "metros" && sessao.metros > 0 && feito.metros > 0;
+  /* Sessão inteira opcional (o trote das sextas de recuperação): feita é
+     bônus, não feita não é falta. */
+  if (!porMetros && exigidos(sessao) === 0) {
+    return feito.min > 0
+      ? { chave: "feito", rotulo: "feito · opcional", pct: 1, min: feito.min,
+          metros: feito.metros, porMetros: false, semPct: true }
+      : { chave: "nao", rotulo: "opcional", pct: 0, min: 0 };
+  }
   const prev = porMetros ? sessao.metros : exigidos(sessao);
   const real = porMetros ? feito.metros : feito.min;
   const pct = prev ? real / prev : 0;
@@ -471,6 +481,7 @@ function estadoDa(sessao, feito) {
 /* "1100 de 1100 m" na natação, "34 de 35 min (+10 opcionais)" no resto. */
 function feitoDe(est, s) {
   if (est.porMetros) return Math.round(est.metros) + " de " + s.metros + " m";
+  if (exigidos(s) === 0) return Math.round(est.min) + " min (sessão opcional)";
   const opcionais = (s.minutos || 0) - exigidos(s);
   return Math.round(est.min) + " de " + exigidos(s) + " min" +
     (opcionais > 0 ? " (+" + opcionais + " opcionais)" : "");
@@ -480,7 +491,7 @@ function chipDe(est, s) {
   const c = el("span", "chip " + est.chave);
   c.appendChild(el("i"));
   c.appendChild(document.createTextNode(
-    est.chave === "nao" ? est.rotulo
+    (est.chave === "nao" || est.semPct) ? est.rotulo
       : est.rotulo + " · " + Math.round(est.pct * 100) + "%"));
   c.title = feitoDe(est, s);
   return c;
