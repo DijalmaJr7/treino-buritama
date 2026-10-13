@@ -257,6 +257,14 @@ footer{margin-top:2rem;padding-top:.8rem;border-top:1px solid var(--risco);
   border:1px solid currentColor;padding:0 .3rem;color:var(--fumaca);line-height:1.5;
   font-variation-settings:'wdth' 84,'wght' 700;vertical-align:middle}
 
+/* educativo: como fazer + vídeo curto (toque de 44 px, contraste ok) */
+.educativo{margin:.15rem 0 .45rem}
+.educativo p{color:var(--fumaca);font-size:.84rem;line-height:1.4;margin-bottom:.2rem}
+a.video{display:inline-flex;align-items:center;min-height:44px;padding:0 .75rem;
+  border:1px solid var(--ouro);color:var(--ouro);text-decoration:none;font-size:.82rem;
+  letter-spacing:.03em;font-variation-settings:'wdth' 84,'wght' 700}
+a.video:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+
 /* "por que este treino": a explicação existe, mas não disputa com o treino */
 details.porque{margin-top:.45rem}
 details.porque > summary{list-style:none;cursor:pointer;min-height:44px;display:flex;
@@ -611,6 +619,21 @@ function pintaPassos(s) {
       if (b.vezes > 1) t.appendChild(el("span", "vezes", "× " + b.vezes));
       if (b.opcional) t.appendChild(el("span", "tag", "opcional"));
       bloco.appendChild(t);
+    }
+    /* Educativo: como fazer, em uma linha, e o vídeo curto do exercício. */
+    if (b.como || b.video) {
+      const ed = el("div", "educativo");
+      if (b.como) ed.appendChild(el("p", null, b.como));
+      if (b.video) {
+        const a = el("a", "video", "▶ Ver o exercício" +
+          (b.segundos ? " (" + b.segundos + " s)" : ""));
+        a.href = b.video;
+        a.target = "_blank";
+        a.rel = "noopener";
+        if (b.canal) a.title = "Vídeo de " + b.canal;
+        ed.appendChild(a);
+      }
+      bloco.appendChild(ed);
     }
     b.passos.forEach((ps) => {
       const solto = ps.opcional && !b.opcional;
