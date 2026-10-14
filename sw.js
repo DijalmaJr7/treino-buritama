@@ -8,10 +8,13 @@
 // trazem dado que muda e levam a chave no cabeçalho — passam direto.
 
 // Trocar o número força o celular a descartar a casca antiga.
-const CACHE = 'treino-v2';
+// Os ícones têm nome novo a cada troca de arte: o Chrome trata a URL do ícone
+// como imutável e só atualiza o ícone instalado quando ela muda.
+const CACHE = 'treino-v3';
 const CASCA = ['./', './index.html', './dados.json', './manifest.json',
-               './icon-192.png', './icon-512.png', './icon-maskable-192.png',
-               './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
+               './icon-leao-192.png', './icon-leao-512.png', './icon-leao-maskable-192.png',
+               './icon-leao-maskable-512.png', './apple-touch-icon-leao.png',
+               './favicon-leao-32.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CASCA)).then(() => self.skipWaiting()));
