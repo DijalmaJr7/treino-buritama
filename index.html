@@ -1141,12 +1141,21 @@ function graficoFC() {
   return s;
 }
 
+/* Ritmo do nado = o que o relógio mostra no fim do treino: tempo em movimento,
+   sem a borda da piscina (average_speed vem do próprio relógio). O tempo TOTAL
+   de minutosDe é para carga e cumprimento; usado aqui, ele dava 3:15/100m num
+   treino que o relógio fechou em 2:34 (20/10). */
+const ritmoDoNado = (a) => {
+  if (a.average_speed > 0) return 100 / a.average_speed / 60;
+  return a.moving_time > 0 ? a.moving_time / 60 / (a.distance / 100) : 0;
+};
+
 /* Ritmo de natação: eixo INVERTIDO de propósito — mais rápido fica em cima,
    que é como um atleta lê progresso. A legenda diz isso em palavras. */
 function graficoNado() {
   const pontos = G.ativ
-    .filter((a) => String(a.type) === "Swim" && a.distance > 0 && minutosDe(a) > 0)
-    .map((a) => ({ d: dataDe(a), v: minutosDe(a) / (a.distance / 100) }))
+    .filter((a) => String(a.type) === "Swim" && a.distance > 0 && ritmoDoNado(a) > 0)
+    .map((a) => ({ d: dataDe(a), v: ritmoDoNado(a) }))
     .filter((p) => p.v > 1 && p.v < 6)
     .sort((a, b) => a.d.localeCompare(b.d));
   if (pontos.length < 2) return null;
@@ -1217,7 +1226,8 @@ function verEvolucao() {
   const nado = graficoNado();
   if (nado) {
     alvo.appendChild(figura("Ritmo de natação", nado,
-      "Eixo invertido: mais alto é mais rápido. A linha pontilhada é o seu CSS " +
+      "O mesmo ritmo médio que o relógio mostra no fim do treino, sem as paradas " +
+      "na borda. Eixo invertido: mais alto é mais rápido. A linha pontilhada é o seu CSS " +
       "provisório de 2:30/100m — ele ainda não foi confirmado por teste.",
       "Toque num ponto para ver o dia."));
   }
