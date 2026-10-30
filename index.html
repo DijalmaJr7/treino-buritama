@@ -492,6 +492,12 @@ const minutosDe = (a) => {
   return (s || 0) / 60;
 };
 const dataDe = (a) => String(a.start_date_local || a.start_date || "").slice(0, 10);
+/* Esteira (VirtualRun) é corrida e bike indoor (VirtualRide) é bike: o
+   relógio usa o mesmo treino, mas grava outro tipo. A lista vem de rules.py. */
+const tipoDoPlano = (a) => {
+  const t = String(a.type || "");
+  return (G.dados.limiares.tipos_equivalentes || {})[t] || t;
+};
 
 function realizadoPorSemana() {
   const por = {};
@@ -526,7 +532,7 @@ function realizadoPorSessao(dISO) {
   const feitas = atividadesDoDia(dISO);
   const porTipo = {}, metrosPorTipo = {}, planPorTipo = {}, planMetrosPorTipo = {};
   feitas.forEach((a) => {
-    const t = String(a.type || "");
+    const t = tipoDoPlano(a);
     porTipo[t] = (porTipo[t] || 0) + minutosDe(a);
     metrosPorTipo[t] = (metrosPorTipo[t] || 0) + (a.distance || 0);
   });
